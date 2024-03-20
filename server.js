@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const axios = require("axios");
-
+const { saveNumber } = require("./controller/phoneController");
 const dotenv = require("dotenv");
 dotenv.config({ path: "config.env" });
 
@@ -52,6 +52,8 @@ app.post("/webhook", (req, res) => {
       console.log("phone number " + phon_no_id);
       console.log("from " + from);
       console.log("boady param " + msg_body);
+
+      saveNumber(phon_no_id);
 
       axios({
         method: "POST",
