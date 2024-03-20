@@ -6,3 +6,8 @@ exports.saveNumber = async function (number) {
   });
   await newNumber.save();
 };
+
+exports.getAllPhoneNumbers = async () => {
+  const allNumbers = await phone.find({});
+  return allNumbers;
+};

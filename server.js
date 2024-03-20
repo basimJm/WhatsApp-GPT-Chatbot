@@ -2,7 +2,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const axios = require("axios");
 const dbConnection = require("./dbConnection");
-const { saveNumber } = require("./controller/phoneController");
+const cron = require("node-cron");
+const {
+  saveNumber,
+  getAllPhoneNumbers,
+} = require("./controller/phoneController");
 const dotenv = require("dotenv");
 dotenv.config({ path: "config.env" });
 
@@ -32,8 +36,6 @@ app.get("/webhook", (req, res) => {
 });
 
 app.post("/webhook", (req, res) => {
-  //i want some
-
   let body_param = req.body;
 
   console.log(JSON.stringify(body_param, null, 2));
@@ -55,7 +57,7 @@ app.post("/webhook", (req, res) => {
       console.log("from " + from);
       console.log("boady param " + msg_body);
 
-      saveNumber(phon_no_id);
+      saveNumber(from);
 
       axios({
         method: "POST",
@@ -90,4 +92,32 @@ app.get("/", (req, res) => {
   res.status(200).send("hello this is webhook setup");
 });
 
-saveNumber("2313216546546456");
+getAllPhoneNumbers().then((number) => {
+  console.log(number);
+});
+
+// cron.schedule("*/10 * * * * *", () => {
+//   const studentsId = getAllPhoneNumbers();
+//   studentsId.then((student) => {
+//     axios({
+//       method: "POST",
+//       url:
+//         "https://graph.facebook.com/v13.0/" +
+//         student.phoneNum +
+//         "/messages?access_token=" +
+//         token,
+//       data: {
+//         messaging_product: "whatsapp",
+//         to: from,
+//         text: {
+//           body: "Hi Please send your update",
+//         },
+//       },
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//     });
+//   });
+
+//   console.log("This message logs every two seconds");
+// });
