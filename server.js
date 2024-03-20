@@ -1,70 +1,84 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const axios = require("axios");
-const app = express();
-app.use(bodyParser.json());
+
 const dotenv = require("dotenv");
 dotenv.config({ path: "config.env" });
-const PORT = process.env.PORT || 5648;
 
-const myToken = process.env.MYTOKEN;
 const token = process.env.TOKEN;
+const mytoken = process.env.MYTOKEN;
 
-app.listen(PORT, () => {
-  console.log(`running on port : ${PORT}`);
+const app = express().use(bodyParser.json());
+
+app.listen(process.env.PORT, () => {
+  console.log("webhook is listening");
 });
 
-app.get("/webhocks", (req, res) => {
+//to verify the callback url from dashboard side - cloud api side
+app.get("/webhook", (req, res) => {
   let mode = req.query["hub.mode"];
-  let challenge = req.query["hub.challenge"];
+  let challange = req.query["hub.challenge"];
   let token = req.query["hub.verify_token"];
 
   if (mode && token) {
-    if (mode === "subscribe" && token === myToken) {
-      res.status(200).send(challenge);
+    if (mode === "subscribe" && token === mytoken) {
+      res.status(200).send(challange);
     } else {
       res.status(403);
     }
-  } else {
-    res.status(500).send("no data passed");
   }
 });
 
-app.post("/webhocks", (req, res) => {
-  const body = req.body;
-  if (body.object) {
-    console.log("insid object body");
+app.post("/webhook", (req, res) => {
+  //i want some
+
+  let body_param = req.body;
+
+  console.log(JSON.stringify(body_param, null, 2));
+
+  if (body_param.object) {
+    console.log("inside body param");
     if (
-      body.object.entry &&
-      body.object.entry[0].changes &&
-      body.object.entry[0].changes[0].value.messages &&
-      body.object.entry[0].changes[0].value.messages[0]
+      body_param.entry &&
+      body_param.entry[0].changes &&
+      body_param.entry[0].changes[0].value.messages &&
+      body_param.entry[0].changes[0].value.messages[0]
     ) {
-      let phoneNumId =
-        body.entry[0].challenge[0].value.metadata.phone_number_id;
-      let from = body.entry[0].changes[0].value.messages[0].from;
-      let msgBody = body.entry[0].changes[0].value.messages[0].text.body;
+      let phon_no_id =
+        body_param.entry[0].changes[0].value.metadata.phone_number_id;
+      let from = body_param.entry[0].changes[0].value.messages[0].from;
+      let msg_body = body_param.entry[0].changes[0].value.messages[0].text.body;
+
+      console.log("phone number " + phon_no_id);
+      console.log("from " + from);
+      console.log("boady param " + msg_body);
+
       axios({
         method: "POST",
         url:
-          "https://graph.facebook.com/v18.0" / +phoneNumId +
-          "message?access_token" +
+          "https://graph.facebook.com/v13.0/" +
+          phon_no_id +
+          "/messages?access_token=" +
           token,
         data: {
           messaging_product: "whatsapp",
           to: from,
           text: {
-            body: "hey how i can help you",
-          },
-          headers: {
-            "Content-Type": "application/json",
+            body: "Hi.. I'm Prasath, your message is " + msg_body,
           },
         },
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
+
+      res.sendStatus(200);
     } else {
-      res.send("no data");
+      res.sendStatus(404);
     }
-  } else {
-    res.send("no object");
   }
+});
+
+app.get("/", (req, res) => {
+  res.status(200).send("hello this is webhook setup");
 });
