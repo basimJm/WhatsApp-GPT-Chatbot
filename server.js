@@ -93,31 +93,38 @@ app.get("/", (req, res) => {
 });
 
 getAllPhoneNumbers().then((number) => {
-  console.log(number);
+  number.forEach((number) => {
+    console.log(number.phoneNum);
+  });
 });
+app.post("/webhook", (req, res) => {
+  cron.schedule("*/10 * * * * *", () => {
+    const testFrom = "962786135059";
+    const studentsId = getAllPhoneNumbers();
 
-// cron.schedule("*/10 * * * * *", () => {
-//   const studentsId = getAllPhoneNumbers();
-//   studentsId.then((student) => {
-//     axios({
-//       method: "POST",
-//       url:
-//         "https://graph.facebook.com/v13.0/" +
-//         student.phoneNum +
-//         "/messages?access_token=" +
-//         token,
-//       data: {
-//         messaging_product: "whatsapp",
-//         to: from,
-//         text: {
-//           body: "Hi Please send your update",
-//         },
-//       },
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//     });
-//   });
+    studentsId.then((students) => {
+      students.forEach((studendId) => {
+        axios({
+          method: "POST",
+          url:
+            "https://graph.facebook.com/v13.0/" +
+            studendId.phoneNum +
+            "/messages?access_token=" +
+            token,
+          data: {
+            messaging_product: "whatsapp",
+            to: testFrom,
+            text: {
+              body: "Hi Please send your update",
+            },
+          },
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      });
+    });
 
-//   console.log("This message logs every two seconds");
-// });
+    console.log("This message logs every two seconds");
+  });
+});
