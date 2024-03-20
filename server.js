@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const axios = require("axios");
+const dbConnection = require("./dbConnection");
 const { saveNumber } = require("./controller/phoneController");
 const dotenv = require("dotenv");
 dotenv.config({ path: "config.env" });
@@ -9,6 +10,7 @@ const token = process.env.TOKEN;
 const mytoken = process.env.MYTOKEN;
 
 const app = express().use(bodyParser.json());
+dbConnection();
 
 app.listen(process.env.PORT, () => {
   console.log("webhook is listening");
@@ -87,3 +89,5 @@ app.post("/webhook", (req, res) => {
 app.get("/", (req, res) => {
   res.status(200).send("hello this is webhook setup");
 });
+
+saveNumber("2313216546546456");
