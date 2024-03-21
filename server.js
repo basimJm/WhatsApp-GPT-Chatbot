@@ -99,30 +99,36 @@ getAllPhoneNumbers().then((number) => {
   });
 });
 
-cron.schedule("*/10 * * * * *", () => {
-  const testFrom = "962786135059";
-  const studentsId = getAllPhoneNumbers();
+// Calculate the time in Jordan to schedule the task
+const scheduleTimeJordan = moment.tz("09:00", "HH:mm", "Asia/Amman");
 
-  // studentsId.then((students) => {
-  //   students.forEach((studendId) => {
-  axios({
-    method: "POST",
-    url:
-      "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
-      token,
-    data: {
-      messaging_product: "whatsapp",
-      to: "962786135059",
-      text: {
-        body: "Hi Please send your update",
-      },
-    },
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  //   });
-  // });
+// Convert the Jordan time to UTC, as Node Cron runs in UTC time by default
+const scheduleTimeUTC = scheduleTimeJordan.utc().format("HH mm * * *");
 
-  console.log("This message logs every two seconds");
+// cron.schedule("*/10 * * * * *", () => {
+const testFrom = "962786135059";
+const studentsId = getAllPhoneNumbers();
+
+// studentsId.then((students) => {
+//   students.forEach((studendId) => {
+axios({
+  method: "POST",
+  url:
+    "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
+    token,
+  data: {
+    messaging_product: "whatsapp",
+    to: "962786135059",
+    text: {
+      body: "Hi Please send your update",
+    },
+  },
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
+//   });
+// });
+
+console.log("This message logs every two seconds");
+// });
