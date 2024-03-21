@@ -99,32 +99,30 @@ getAllPhoneNumbers().then((number) => {
   });
 });
 
-// cron.schedule("*/10 * * * * *", () => {
-//   const testFrom = 962786135059;
-//   const studentsId = getAllPhoneNumbers();
+cron.schedule("*/10 * * * * *", () => {
+  const testFrom = "962786135059";
+  const studentsId = getAllPhoneNumbers();
 
-//   studentsId.then((students) => {
-//     students.forEach((studendId) => {
-//       axios({
-//         method: "POST",
-//         url:
-//           "https://graph.facebook.com/v13.0/" +
-//           studendId.phoneNum +
-//           "/messages?access_token=" +
-//           token,
-//         data: {
-//           messaging_product: "whatsapp",
-//           to: testFrom,
-//           text: {
-//             body: "Hi Please send your update",
-//           },
-//         },
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//       });
-//     });
-//   });
+  // studentsId.then((students) => {
+  //   students.forEach((studendId) => {
+  axios({
+    method: "POST",
+    url:
+      "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
+      token,
+    data: {
+      messaging_product: "whatsapp",
+      to: "962786135059",
+      text: {
+        body: "Hi Please send your update",
+      },
+    },
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  //   });
+  // });
 
-//   console.log("This message logs every two seconds");
-// });
+  console.log("This message logs every two seconds");
+});
