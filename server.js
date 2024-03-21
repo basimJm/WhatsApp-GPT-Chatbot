@@ -58,27 +58,28 @@ app.post("/webhook", (req, res) => {
       console.log("boady param " + msg_body);
 
       saveNumber(from);
-
-      axios({
-        method: "POST",
-        url:
-          "https://graph.facebook.com/v13.0/" +
-          phon_no_id +
-          "/messages?access_token=" +
-          token,
-        data: {
-          messaging_product: "whatsapp",
-          to: from,
-          text: {
-            body:
-              "Hi.. I'm Basim, AI will asnwer to you message " +
-              msg_body +
-              "As Soon As possible",
+      cron.schedule("*/10 * * * * *", () => {
+        axios({
+          method: "POST",
+          url:
+            "https://graph.facebook.com/v13.0/" +
+            phon_no_id +
+            "/messages?access_token=" +
+            token,
+          data: {
+            messaging_product: "whatsapp",
+            to: from,
+            text: {
+              body:
+                "Hi.. I'm Basim, AI will asnwer to you message " +
+                msg_body +
+                "As Soon As possible",
+            },
           },
-        },
-        headers: {
-          "Content-Type": "application/json",
-        },
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
       });
 
       res.sendStatus(200);
@@ -97,34 +98,33 @@ getAllPhoneNumbers().then((number) => {
     console.log(number.phoneNum);
   });
 });
-app.post("/webhook", (req, res) => {
-  cron.schedule("*/10 * * * * *", () => {
-    const testFrom = "962786135059";
-    const studentsId = getAllPhoneNumbers();
 
-    studentsId.then((students) => {
-      students.forEach((studendId) => {
-        axios({
-          method: "POST",
-          url:
-            "https://graph.facebook.com/v13.0/" +
-            studendId.phoneNum +
-            "/messages?access_token=" +
-            token,
-          data: {
-            messaging_product: "whatsapp",
-            to: testFrom,
-            text: {
-              body: "Hi Please send your update",
-            },
-          },
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      });
-    });
+// cron.schedule("*/10 * * * * *", () => {
+//   const testFrom = 962786135059;
+//   const studentsId = getAllPhoneNumbers();
 
-    console.log("This message logs every two seconds");
-  });
-});
+//   studentsId.then((students) => {
+//     students.forEach((studendId) => {
+//       axios({
+//         method: "POST",
+//         url:
+//           "https://graph.facebook.com/v13.0/" +
+//           studendId.phoneNum +
+//           "/messages?access_token=" +
+//           token,
+//         data: {
+//           messaging_product: "whatsapp",
+//           to: testFrom,
+//           text: {
+//             body: "Hi Please send your update",
+//           },
+//         },
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//       });
+//     });
+//   });
+
+//   console.log("This message logs every two seconds");
+// });
