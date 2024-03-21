@@ -58,7 +58,7 @@ app.post("/webhook", (req, res) => {
       console.log("boady param " + msg_body);
 
       saveNumber(from);
-      cron.schedule("*/10 * * * * *", () => {
+      cron.schedule("0 */10 * * *", () => {
         axios({
           method: "POST",
           url:
