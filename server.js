@@ -3,11 +3,14 @@ const bodyParser = require("body-parser");
 const axios = require("axios");
 const dbConnection = require("./dbConnection");
 const cron = require("node-cron");
+const moment = require("moment-timezone");
+
 const {
   saveNumber,
   getAllPhoneNumbers,
 } = require("./controller/phoneController");
 const dotenv = require("dotenv");
+const { mongo } = require("mongoose");
 dotenv.config({ path: "config.env" });
 
 const token = process.env.TOKEN;
@@ -58,7 +61,6 @@ app.post("/webhook", (req, res) => {
       console.log("boady param " + msg_body);
 
       saveNumber(from);
-      // cron.schedule("0 */10 * * *", () => {
       axios({
         method: "POST",
         url:
@@ -80,7 +82,6 @@ app.post("/webhook", (req, res) => {
           "Content-Type": "application/json",
         },
       });
-      // });
 
       res.sendStatus(200);
     } else {
@@ -99,36 +100,33 @@ getAllPhoneNumbers().then((number) => {
   });
 });
 
-// Calculate the time in Jordan to schedule the task
-// const scheduleTimeJordan = moment.tz("09:00", "HH:mm", "Asia/Amman");
+const scheduleTimeJordan = moment.tz("09:00", "HH:mm", "Asia/Amman");
+const scheduleTimeUTC = scheduleTimeJordan.utc().format("HH mm * * *");
 
-// Convert the Jordan time to UTC, as Node Cron runs in UTC time by default
-// const scheduleTimeUTC = scheduleTimeJordan.utc().format("HH mm * * *");
+cron.schedule(scheduleTimeUTC, () => {
+  const testFrom = "962786135059";
+  const studentsId = getAllPhoneNumbers();
 
-// cron.schedule("*/10 * * * * *", () => {
-const testFrom = "962786135059";
-const studentsId = getAllPhoneNumbers();
-
-// studentsId.then((students) => {
-//   students.forEach((studendId) => {
-axios({
-  method: "POST",
-  url:
-    "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
-    token,
-  data: {
-    messaging_product: "whatsapp",
-    to: "962786135059",
-    text: {
-      body: "Hi Please send your update",
+  // studentsId.then((students) => {
+  //   students.forEach((studendId) => {
+  axios({
+    method: "POST",
+    url:
+      "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
+      token,
+    data: {
+      messaging_product: "whatsapp",
+      to: "962786135059",
+      text: {
+        body: "Hi Please send your update",
+      },
     },
-  },
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-//   });
-// });
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  //   });
+  // });
 
-console.log("This message logs every two seconds");
-// });
+  console.log("This message logs every two seconds");
+});
