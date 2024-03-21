@@ -100,10 +100,10 @@ getAllPhoneNumbers().then((number) => {
 });
 
 // Calculate the time in Jordan to schedule the task
-const scheduleTimeJordan = moment.tz("09:00", "HH:mm", "Asia/Amman");
+// const scheduleTimeJordan = moment.tz("09:00", "HH:mm", "Asia/Amman");
 
 // Convert the Jordan time to UTC, as Node Cron runs in UTC time by default
-const scheduleTimeUTC = scheduleTimeJordan.utc().format("HH mm * * *");
+// const scheduleTimeUTC = scheduleTimeJordan.utc().format("HH mm * * *");
 
 // cron.schedule("*/10 * * * * *", () => {
 const testFrom = "962786135059";
