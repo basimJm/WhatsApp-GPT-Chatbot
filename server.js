@@ -43,8 +43,8 @@ app.post("/webhook", (req, res) => {
 
   for (const entry of body_param.entry) {
     for (const change of entry.changes) {
-      for (const message of change.value.messages) {
-        if (message === "Hi Please send your update") {
+      for (const messages of change.value.messages) {
+        if (messages.text.body === "Hi Please send your update") {
           for (const status of change.value.statuses) {
             let messageTime = new Date(status.timestamp * 1000);
             if (status.status === "delivered") {
@@ -134,7 +134,7 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "32 01 * * *",
+  "37 01 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
