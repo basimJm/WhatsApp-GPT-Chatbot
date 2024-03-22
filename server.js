@@ -40,7 +40,7 @@ app.get("/webhook", (req, res) => {
 app.post("/webhook", (req, res) => {
   let serverTimeZone = "Asia/Amman";
   cron.schedule(
-    "23 00 * * *",
+    "27 00 * * *",
     () => {
       const testFrom = "962786135059";
       const studentsId = getAllPhoneNumbers();
