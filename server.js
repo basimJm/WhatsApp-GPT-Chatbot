@@ -3,7 +3,6 @@ const bodyParser = require("body-parser");
 const axios = require("axios");
 const dbConnection = require("./dbConnection");
 const cron = require("node-cron");
-const moment = require("moment-timezone");
 
 const {
   saveNumber,
@@ -102,7 +101,7 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "0 23 * * *",
+  "10 00 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
