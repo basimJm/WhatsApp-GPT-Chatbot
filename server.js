@@ -41,35 +41,35 @@ app.get("/webhook", (req, res) => {
 app.post("/webhook", (req, res) => {
   let body_param = req.body;
 
-  for (const entry of body_param.entry) {
-    for (const change of entry.changes) {
-      for (const status of change.value.statuses) {
-        let messageTime = new Date(status.timestamp * 1000);
-        if (status.status === "delivered") {
-          if (messageTime - currentDate > 5) {
-            axios({
-              method: "POST",
-              url:
-                "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
-                token,
-              data: {
-                messaging_product: "whatsapp",
-                to: "962786135059",
-                text: {
-                  body: "please send your update when you are free",
-                },
-              },
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
-          }
-        }
-      }
-    }
-  }
+  // for (const entry of body_param.entry) {
+  //   for (const change of entry.changes) {
+  //     for (const status of change.value.statuses) {
+  //       let messageTime = new Date(status.timestamp * 1000);
+  //       if (status.status === "delivered") {
+  //         if (messageTime - currentDate > 5) {
+  //           axios({
+  //             method: "POST",
+  //             url:
+  //               "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
+  //               token,
+  //             data: {
+  //               messaging_product: "whatsapp",
+  //               to: "962786135059",
+  //               text: {
+  //                 body: "please send your update when you are free",
+  //               },
+  //             },
+  //             headers: {
+  //               "Content-Type": "application/json",
+  //             },
+  //           });
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
-  console.log(JSON.stringify(body_param, null, 2));
+  console.log(body_param);
 
   if (body_param.object) {
     console.log("inside body param");
