@@ -37,7 +37,7 @@ app.get("/webhook", (req, res) => {
   }
 });
 
-app.post("/webhooksss", (req, res) => {
+app.post("/webhook", (req, res) => {
   let serverTimeZone = "Asia/Amman";
   cron.schedule(
     "13 00 * * *",
