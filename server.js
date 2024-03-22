@@ -100,7 +100,7 @@ getAllPhoneNumbers().then((number) => {
   });
 });
 
-const scheduleTimeJordan = moment.tz("09:00", "HH:mm", "Asia/Amman");
+const scheduleTimeJordan = moment.tz("22:45", "HH:mm", "Asia/Amman");
 const scheduleTimeUTC = scheduleTimeJordan.utc().format("HH mm * * *");
 
 cron.schedule(scheduleTimeUTC, () => {
