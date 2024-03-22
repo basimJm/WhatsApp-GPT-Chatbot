@@ -40,6 +40,12 @@ app.get("/webhook", (req, res) => {
 app.post("/webhook", (req, res) => {
   let body_param = req.body;
 
+  // let scheduleMessage = body_param.entry[0].changes[0].value.messages[0].text.body;
+
+  //   if(scheduleMessage === "Hi Please send your update" ){
+  //     let status = body_param.entry[0].changes[0].statuses[0].
+  //   }
+
   console.log(JSON.stringify(body_param, null, 2));
 
   if (body_param.object) {
@@ -101,7 +107,7 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "43 00 * * *",
+  "17 01 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
@@ -124,7 +130,7 @@ cron.schedule(
         "Content-Type": "application/json",
       },
     }).then((response) => {
-      console.log(response.data);
+      console.log(`response is ${response.data}`);
     });
     //   });
     // });
