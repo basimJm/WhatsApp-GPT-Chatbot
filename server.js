@@ -100,33 +100,38 @@ getAllPhoneNumbers().then((number) => {
   });
 });
 
-const scheduleTimeJordan = moment.tz("22:50", "HH:mm", "Asia/Amman");
-const scheduleTimeUTC = scheduleTimeJordan.utc().format("HH mm * * *");
+let serverTimeZone = "Asia/Amman";
+cron.schedule(
+  "0 23 * * *",
+  () => {
+    const testFrom = "962786135059";
+    const studentsId = getAllPhoneNumbers();
 
-cron.schedule(scheduleTimeUTC, () => {
-  const testFrom = "962786135059";
-  const studentsId = getAllPhoneNumbers();
-
-  // studentsId.then((students) => {
-  //   students.forEach((studendId) => {
-  axios({
-    method: "POST",
-    url:
-      "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
-      token,
-    data: {
-      messaging_product: "whatsapp",
-      to: "962786135059",
-      text: {
-        body: "Hi Please send your update",
+    // studentsId.then((students) => {
+    //   students.forEach((studendId) => {
+    axios({
+      method: "POST",
+      url:
+        "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
+        token,
+      data: {
+        messaging_product: "whatsapp",
+        to: "962786135059",
+        text: {
+          body: "Hi Please send your update",
+        },
       },
-    },
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  //   });
-  // });
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    //   });
+    // });
 
-  console.log("This message logs every two seconds");
-});
+    console.log("This message logs every two seconds");
+  },
+  {
+    scheduled: true,
+    timezone: serverTimeZone,
+  }
+);
