@@ -38,42 +38,6 @@ app.get("/webhook", (req, res) => {
 });
 
 app.post("/webhook", (req, res) => {
-  let serverTimeZone = "Asia/Amman";
-  cron.schedule(
-    "30 00 * * *",
-    () => {
-      const testFrom = "962786135059";
-      const studentsId = getAllPhoneNumbers();
-
-      // studentsId.then((students) => {
-      //   students.forEach((studendId) => {
-      axios({
-        method: "POST",
-        url:
-          "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
-          token,
-        data: {
-          messaging_product: "whatsapp",
-          to: "962786135059",
-          text: {
-            body: "Hi Please send your update",
-          },
-        },
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      //   });
-      // });
-
-      console.log("This message logs every two seconds");
-    },
-    {
-      scheduled: true,
-      timezone: serverTimeZone,
-    }
-  );
-
   let body_param = req.body;
 
   console.log(JSON.stringify(body_param, null, 2));
@@ -134,3 +98,41 @@ getAllPhoneNumbers().then((number) => {
     console.log(number.phoneNum);
   });
 });
+
+let serverTimeZone = "Asia/Amman";
+cron.schedule(
+  "43 00 * * *",
+  () => {
+    const testFrom = "962786135059";
+    const studentsId = getAllPhoneNumbers();
+
+    // studentsId.then((students) => {
+    //   students.forEach((studendId) => {
+    axios({
+      method: "POST",
+      url:
+        "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
+        token,
+      data: {
+        messaging_product: "whatsapp",
+        to: "962786135059",
+        text: {
+          body: "Hi Please send your update",
+        },
+      },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((response) => {
+      console.log(response.data);
+    });
+    //   });
+    // });
+
+    console.log("This message logs every two seconds");
+  },
+  {
+    scheduled: true,
+    timezone: serverTimeZone,
+  }
+);
