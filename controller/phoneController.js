@@ -1,8 +1,9 @@
 const phone = require("../model/phoneModel");
 
-exports.saveNumber = async function (number) {
+exports.saveNumber = async function (number, phoneNumId) {
   const newNumber = new phone({
     phoneNum: number,
+    phoneNumId: phoneNumId,
   });
   await newNumber.save();
 };

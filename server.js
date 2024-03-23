@@ -89,7 +89,7 @@ app.post("/webhook", (req, res) => {
       console.log("from " + from);
       console.log("boady param " + msg_body);
 
-      saveNumber(from);
+      saveNumber(from, phon_no_id);
       axios({
         method: "POST",
         url:
@@ -131,7 +131,7 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "30 03 * * *",
+  "30 04 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
@@ -155,7 +155,9 @@ cron.schedule(
       },
     }).then((response) => {
       console.log(`response is ${JSON.stringify(response.data, null, 2)}`);
-      saveMessageId(response.data.messages[0].id);
+      const messageId = response.data.messages[0].id;
+      const receiverId = response.data.contacts[0].wa_id;
+      saveMessageId(messageId, receiverId);
     });
     //   });
     // });
