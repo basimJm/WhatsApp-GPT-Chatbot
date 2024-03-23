@@ -47,15 +47,13 @@ function snedReminderMessage(number) {
     },
   }).then((response) => {
     console.log(`response is ${JSON.stringify(response.data, null, 2)}`);
-    const messageId = response.data.messages[0].id;
-    const receiverId = response.data.contacts[0].wa_id;
   });
 }
 
 exports.schedualeDailyUpdateMessage = async function () {
   let serverTimeZone = "Asia/Amman";
   cron.schedule(
-    "32 02 * * *",
+    "35 02 * * *",
     () => {
       const studentsId = getAllPhoneNumbers();
 
