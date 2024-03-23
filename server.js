@@ -125,7 +125,7 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "59 00 * * *",
+  "04 01 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
@@ -172,38 +172,31 @@ messages.then((message) => {
         console.log(
           `number is ${number.phoneNum} and id is ${number.phoneNumId}`
         );
-        cron.schedule(
-          "0 * * * *",
-          () => {
-            axios({
-              method: "POST",
-              url:
-                `https://graph.facebook.com/v13.0/${number.phoneNumId}/messages?access_token=` +
-                token,
-              data: {
-                messaging_product: "whatsapp",
-                to: `${number.phoneNum}`,
-                text: {
-                  body: "Hi Please send your update",
-                },
+        cron.schedule("*/2 * * * *", () => {
+          axios({
+            method: "POST",
+            url:
+              `https://graph.facebook.com/v13.0/${number.phoneNumId}/messages?access_token=` +
+              token,
+            data: {
+              messaging_product: "whatsapp",
+              to: `${number.phoneNum}`,
+              text: {
+                body: "Hi Please send your update",
               },
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }).then((response) => {
-              console.log(
-                `response is ${JSON.stringify(response.data, null, 2)}`
-              );
-              const messageId = response.data.messages[0].id;
-              const receiverId = response.data.contacts[0].wa_id;
-              saveMessageId(messageId, receiverId);
-            });
-          },
-          {
-            scheduled: true,
-            timezone: serverTimeZone,
-          }
-        );
+            },
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }).then((response) => {
+            console.log(
+              `response is ${JSON.stringify(response.data, null, 2)}`
+            );
+            const messageId = response.data.messages[0].id;
+            const receiverId = response.data.contacts[0].wa_id;
+            saveMessageId(messageId, receiverId);
+          });
+        });
       });
     }
   });
