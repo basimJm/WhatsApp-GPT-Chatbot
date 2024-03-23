@@ -181,7 +181,7 @@ messages.then((message) => {
           `number is ${number.phoneNum} and id is ${number.phoneNumId}`
         );
         cron.schedule(
-          "*/2  * * * *",
+          "50 00 * * *",
           () => {
             axios({
               method: "POST",
