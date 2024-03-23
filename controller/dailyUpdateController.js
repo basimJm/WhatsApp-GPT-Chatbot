@@ -55,13 +55,13 @@ function snedReminderMessage(number) {
 exports.schedualeDailyUpdateMessage = async function () {
   let serverTimeZone = "Asia/Amman";
   cron.schedule(
-    "25 02 * * *",
+    "32 02 * * *",
     () => {
       const studentsId = getAllPhoneNumbers();
 
       studentsId.then((students) => {
         students.forEach((studendId) => {
-          sendDailyUpdateMessage(studendId);
+          sendDailyUpdateMessage(studendId.phoneNumId, studendId.phoneNum);
         });
       });
 
@@ -73,15 +73,15 @@ exports.schedualeDailyUpdateMessage = async function () {
     }
   );
 };
-function sendDailyUpdateMessage(studendId) {
+function sendDailyUpdateMessage(phoneNumId, phoneNum) {
   axios({
     method: "POST",
     url:
-      `https://graph.facebook.com/v13.0/${studendId.phoneNumId}/messages?access_token=` +
+      `https://graph.facebook.com/v13.0/${phoneNumId}/messages?access_token=` +
       token,
     data: {
       messaging_product: "whatsapp",
-      to: `${studendId.phoneNum}`,
+      to: `${phoneNum}`,
       text: {
         body: "Hi Please send your update",
       },
