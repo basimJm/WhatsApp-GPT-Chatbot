@@ -2,16 +2,8 @@ const token = process.env.TOKEN;
 const mytoken = process.env.MYTOKEN;
 const axios = require("axios");
 
-const {
-  saveNumber,
-  getAllPhoneNumbers,
-  findNumberId,
-} = require("./phoneController");
-const {
-  saveMessageId,
-  updateStatus,
-  getAllDailyMessages,
-} = require("./botMessageController");
+const { saveNumber } = require("./phoneController");
+const { updateStatus } = require("./botMessageController");
 
 exports.getWebhookMessage = async (req, res) => {
   let mode = req.query["hub.mode"];

@@ -1,16 +1,10 @@
 const axios = require("axios");
 const cron = require("node-cron");
 const token = process.env.TOKEN;
-const mytoken = process.env.MYTOKEN;
 
-const {
-  saveNumber,
-  getAllPhoneNumbers,
-  findNumberId,
-} = require("./phoneController");
+const { getAllPhoneNumbers, findNumberId } = require("./phoneController");
 const {
   saveMessageId,
-  updateStatus,
   getAllDailyMessages,
 } = require("./botMessageController");
 
@@ -25,8 +19,11 @@ exports.schedualeReminderMessage = async function () {
           );
           cron.schedule("*/2 * * * *", () => {
             snedReminderMessage(number);
+            return;
           });
         });
+      } else {
+        return;
       }
     });
   });
