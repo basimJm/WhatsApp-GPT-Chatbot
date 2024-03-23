@@ -130,7 +130,7 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "37 01 * * *",
+  "15 03 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
@@ -153,7 +153,7 @@ cron.schedule(
         "Content-Type": "application/json",
       },
     }).then((response) => {
-      console.log(`response is ${response.data}`);
+      console.log(`response is ${JSON.stringify(response.data, null, 2)}`);
     });
     //   });
     // });
