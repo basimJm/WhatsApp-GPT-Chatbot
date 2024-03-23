@@ -8,6 +8,7 @@ const {
   saveNumber,
   getAllPhoneNumbers,
 } = require("./controller/phoneController");
+const { saveMessageId } = require("./controller/botMessageController");
 const dotenv = require("dotenv");
 const { mongo } = require("mongoose");
 dotenv.config({ path: "config.env" });
@@ -130,7 +131,7 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "15 03 * * *",
+  "30 03 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
@@ -154,6 +155,7 @@ cron.schedule(
       },
     }).then((response) => {
       console.log(`response is ${JSON.stringify(response.data, null, 2)}`);
+      saveMessageId(response.data.messages[0].id);
     });
     //   });
     // });
