@@ -14,3 +14,8 @@ exports.updateStatus = async function (messageId, newStatus) {
     { status: newStatus }
   );
 };
+
+exports.getAllDailyMessages = async function () {
+  const messages = await botModel.find({});
+  return messages;
+};

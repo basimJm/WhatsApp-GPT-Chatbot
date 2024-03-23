@@ -12,3 +12,8 @@ exports.getAllPhoneNumbers = async () => {
   const allNumbers = await phone.find({});
   return allNumbers;
 };
+
+exports.findNumberId = async function (phoneNum) {
+  const mobile = await phone.findOne({ phoneNum: phoneNum });
+  return mobile;
+};

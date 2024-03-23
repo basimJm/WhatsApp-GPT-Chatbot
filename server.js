@@ -7,10 +7,12 @@ const cron = require("node-cron");
 const {
   saveNumber,
   getAllPhoneNumbers,
+  findNumberId,
 } = require("./controller/phoneController");
 const {
   saveMessageId,
   updateStatus,
+  getAllDailyMessages,
 } = require("./controller/botMessageController");
 const dotenv = require("dotenv");
 const { mongo } = require("mongoose");
@@ -123,7 +125,7 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "03 00 * * *",
+  "40 00 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
@@ -162,9 +164,55 @@ cron.schedule(
   }
 );
 
-const x = getAllPhoneNumbers();
-x.then((y) => {
-  y.forEach((z) => {
-    console.log(`${z.phoneNum},${z.phoneNumId}`);
+// const x = getAllPhoneNumbers();
+// x.then((y) => {
+//   y.forEach((z) => {
+//     const w = findNumberId(z.phoneNum)
+//     console.log(`${z.phoneNum},${z.phoneNumId}`);
+//   });
+// });
+
+const messages = getAllDailyMessages();
+messages.then((message) => {
+  message.forEach((it) => {
+    if (it.status === "delivered") {
+      findNumberId(it.receiverId).then((number) => {
+        console.log(
+          `number is ${number.phoneNum} and id is ${number.phoneNumId}`
+        );
+        cron.schedule(
+          "*/2  * * * *",
+          () => {
+            axios({
+              method: "POST",
+              url:
+                `https://graph.facebook.com/v13.0/${number.phoneNumId}/messages?access_token=` +
+                token,
+              data: {
+                messaging_product: "whatsapp",
+                to: `${number.phoneNum}`,
+                text: {
+                  body: "Hi Please send your update",
+                },
+              },
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }).then((response) => {
+              console.log(
+                `response is ${JSON.stringify(response.data, null, 2)}`
+              );
+              const messageId = response.data.messages[0].id;
+              const receiverId = response.data.contacts[0].wa_id;
+              saveMessageId(messageId, receiverId);
+            });
+          },
+          {
+            scheduled: true,
+            timezone: serverTimeZone,
+          }
+        );
+      });
+    }
   });
 });
