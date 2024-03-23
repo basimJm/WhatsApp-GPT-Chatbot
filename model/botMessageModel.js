@@ -7,6 +7,10 @@ const botSchema = new mongoose.Schema({
   receiverId: {
     type: String,
   },
+  status: {
+    type: String,
+    default: "sent",
+  },
 });
 
 const botModel = mongoose.model("BotMessage", botSchema);

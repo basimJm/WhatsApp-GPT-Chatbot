@@ -7,3 +7,11 @@ exports.saveMessageId = async function (messageId, receiverId) {
   });
   await newMessageId.save();
 };
+
+exports.updateStatus = async function (messageId, newStatus) {
+  const botMessage = await botModel.findOneAndUpdate({ messageId: messageId });
+  if (botMessage) {
+    botMessage.status = newStatus;
+    await botMessage.save();
+  }
+};

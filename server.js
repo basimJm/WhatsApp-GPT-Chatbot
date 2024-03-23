@@ -8,7 +8,10 @@ const {
   saveNumber,
   getAllPhoneNumbers,
 } = require("./controller/phoneController");
-const { saveMessageId } = require("./controller/botMessageController");
+const {
+  saveMessageId,
+  updateStatus,
+} = require("./controller/botMessageController");
 const dotenv = require("dotenv");
 const { mongo } = require("mongoose");
 dotenv.config({ path: "config.env" });
@@ -42,33 +45,20 @@ app.get("/webhook", (req, res) => {
 app.post("/webhook", (req, res) => {
   let body_param = req.body;
 
-  // for (const entry of body_param.entry) {
-  //   for (const change of entry.changes) {
-  //     for (const status of change.value.statuses) {
-  //       let messageTime = new Date(status.timestamp * 1000);
-  //       if (status.status === "delivered") {
-  //         if (messageTime - currentDate > 5) {
-  //           axios({
-  //             method: "POST",
-  //             url:
-  //               "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
-  //               token,
-  //             data: {
-  //               messaging_product: "whatsapp",
-  //               to: "962786135059",
-  //               text: {
-  //                 body: "please send your update when you are free",
-  //               },
-  //             },
-  //             headers: {
-  //               "Content-Type": "application/json",
-  //             },
-  //           });
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  const hasStatuses = body_param.entry.some((entry) =>
+    entry.changes.some((change) => change.value.hasOwnProperty("statuses"))
+  );
+
+  if (hasStatuses) {
+    console.log("The body contains statuses");
+    body_param.entry.forEach((entry) => {
+      entry.changes.forEach((change) => {
+        change.value.statuses.forEach((status) => {
+          updateStatus(status.id, status.status);
+        });
+      });
+    });
+  }
 
   console.log(JSON.stringify(body_param, null, 2));
 
@@ -131,7 +121,7 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "30 04 * * *",
+  "03 05 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
