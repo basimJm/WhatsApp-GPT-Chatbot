@@ -23,7 +23,7 @@ const currentDate = new Date();
 const app = express().use(bodyParser.json());
 dbConnection();
 
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT || 5000, () => {
   console.log("webhook is listening");
 });
 
@@ -123,36 +123,36 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "02 22 * * *",
+  "03 00 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
 
-    // studentsId.then((students) => {
-    //   students.forEach((studendId) => {
-    axios({
-      method: "POST",
-      url:
-        "https://graph.facebook.com/v13.0/284046934785737/messages?access_token=" +
-        token,
-      data: {
-        messaging_product: "whatsapp",
-        to: "962786135059",
-        text: {
-          body: "Hi Please send your update",
-        },
-      },
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then((response) => {
-      console.log(`response is ${JSON.stringify(response.data, null, 2)}`);
-      const messageId = response.data.messages[0].id;
-      const receiverId = response.data.contacts[0].wa_id;
-      saveMessageId(messageId, receiverId);
+    studentsId.then((students) => {
+      students.forEach((studendId) => {
+        axios({
+          method: "POST",
+          url:
+            `https://graph.facebook.com/v13.0/${studendId.phoneNumId}/messages?access_token=` +
+            token,
+          data: {
+            messaging_product: "whatsapp",
+            to: `${studendId.phoneNum}`,
+            text: {
+              body: "Hi Please send your update",
+            },
+          },
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }).then((response) => {
+          console.log(`response is ${JSON.stringify(response.data, null, 2)}`);
+          const messageId = response.data.messages[0].id;
+          const receiverId = response.data.contacts[0].wa_id;
+          saveMessageId(messageId, receiverId);
+        });
+      });
     });
-    //   });
-    // });
 
     console.log("This message logs every two seconds");
   },
@@ -161,3 +161,10 @@ cron.schedule(
     timezone: serverTimeZone,
   }
 );
+
+const x = getAllPhoneNumbers();
+x.then((y) => {
+  y.forEach((z) => {
+    console.log(`${z.phoneNum},${z.phoneNumId}`);
+  });
+});
