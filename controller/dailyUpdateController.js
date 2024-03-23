@@ -1,5 +1,7 @@
 const axios = require("axios");
 const cron = require("node-cron");
+const token = process.env.TOKEN;
+const mytoken = process.env.MYTOKEN;
 
 const {
   saveNumber,
@@ -39,7 +41,7 @@ function snedReminderMessage(number) {
       messaging_product: "whatsapp",
       to: `${number.phoneNum}`,
       text: {
-        body: "Hi Please send your update",
+        body: "Reminder!! : please send your update as soon as possible",
       },
     },
     headers: {
@@ -53,7 +55,7 @@ function snedReminderMessage(number) {
 exports.schedualeDailyUpdateMessage = async function () {
   let serverTimeZone = "Asia/Amman";
   cron.schedule(
-    "35 02 * * *",
+    "40 02 * * *",
     () => {
       const studentsId = getAllPhoneNumbers();
 
