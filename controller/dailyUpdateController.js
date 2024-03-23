@@ -55,7 +55,7 @@ function snedReminderMessage(number) {
 exports.schedualeDailyUpdateMessage = async function () {
   let serverTimeZone = "Asia/Amman";
   cron.schedule(
-    "20 02 * * *",
+    "25 02 * * *",
     () => {
       const studentsId = getAllPhoneNumbers();
 
