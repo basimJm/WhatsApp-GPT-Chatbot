@@ -54,7 +54,9 @@ app.post("/webhook", (req, res) => {
     body_param.entry.forEach((entry) => {
       entry.changes.forEach((change) => {
         change.value.statuses.forEach((status) => {
-          updateStatus(status.id, status.status);
+          if (status.status !== "status") {
+            updateStatus(status.id, status.status);
+          }
         });
       });
     });
@@ -121,7 +123,7 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "03 05 * * *",
+  "20 05 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
