@@ -125,7 +125,7 @@ getAllPhoneNumbers().then((number) => {
 
 let serverTimeZone = "Asia/Amman";
 cron.schedule(
-  "40 00 * * *",
+  "59 00 * * *",
   () => {
     const testFrom = "962786135059";
     const studentsId = getAllPhoneNumbers();
@@ -164,14 +164,6 @@ cron.schedule(
   }
 );
 
-// const x = getAllPhoneNumbers();
-// x.then((y) => {
-//   y.forEach((z) => {
-//     const w = findNumberId(z.phoneNum)
-//     console.log(`${z.phoneNum},${z.phoneNumId}`);
-//   });
-// });
-
 const messages = getAllDailyMessages();
 messages.then((message) => {
   message.forEach((it) => {
@@ -181,7 +173,7 @@ messages.then((message) => {
           `number is ${number.phoneNum} and id is ${number.phoneNumId}`
         );
         cron.schedule(
-          "50 00 * * *",
+          "0 * * * *",
           () => {
             axios({
               method: "POST",
