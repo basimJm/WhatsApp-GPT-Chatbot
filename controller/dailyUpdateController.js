@@ -50,7 +50,7 @@ function snedReminderMessage(number) {
 
 function getMessageStatus(messageId) {
   return new Promise((resolve, reject) => {
-    messageModel.findByone(messageId, (err, message) => {
+    messageModel.findOne({ messageId: messageId }, (err, message) => {
       if (err) {
         reject(err);
       } else {
