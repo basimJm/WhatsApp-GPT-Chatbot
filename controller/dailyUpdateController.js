@@ -11,31 +11,29 @@ const {
 } = require("./botMessageController");
 
 exports.schedualeReminderMessage = async function () {
-  const messages = getAllDailyMessages();
-  messages.then((message) => {
-    message.forEach((it) => {
-      if (it.status === "delivered" || it.status === "sent") {
-        findNumberId(it.receiverId).then((number) => {
-          console.log(
-            `number is ${number.phoneNum} and id is ${number.phoneNumId}`
-          );
-          cron.schedule("*/1 * * * *", () => {
-            checkMessageStatus(it._id, number);
-          });
-        });
-      }
-    });
+  const messages = await getAllDailyMessages();
+
+  messages.forEach(async (it) => {
+    if (it.status === "delivered" || it.status === "sent") {
+      const number = await findNumberId(it.receiverId);
+      console.log(
+        `number is ${number.phoneNum} and id is ${number.phoneNumId}`
+      );
+      cron.schedule("*/1 * * * *", () => {
+        snedReminderMessage(number.phoneNumId, number.phoneNum);
+      });
+    }
   });
 };
-function snedReminderMessage(number) {
+function snedReminderMessage(phoneNumId, phoneNum) {
   axios({
     method: "POST",
     url:
-      `https://graph.facebook.com/v13.0/${number.phoneNumId}/messages?access_token=` +
+      `https://graph.facebook.com/v13.0/${phoneNumId}/messages?access_token=` +
       token,
     data: {
       messaging_product: "whatsapp",
-      to: `${number.phoneNum}`,
+      to: `${phoneNum}`,
       text: {
         body: "Reminder!! : please send your update as soon as possible",
       },
@@ -45,29 +43,6 @@ function snedReminderMessage(number) {
     },
   }).then((response) => {
     console.log(`response is ${JSON.stringify(response.data, null, 2)}`);
-  });
-}
-
-function getMessageStatus(messageId) {
-  return new Promise((resolve, reject) => {
-    messageModel.findOne({ messageId: messageId }, (err, message) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(message.status);
-      }
-    });
-  });
-}
-
-function checkMessageStatus(messageId, number) {
-  getMessageStatus(messageId).then((status) => {
-    if (status === "read") {
-      console.log("Message has been read, no reminder needed.");
-    } else {
-      console.log("Sending reminder message...");
-      snedReminderMessage(number);
-    }
   });
 }
 
