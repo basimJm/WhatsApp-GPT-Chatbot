@@ -71,9 +71,9 @@ exports.postWeebhook = async (req, res) => {
           to: from,
           text: {
             body:
-              "Hi.. I'm Basim, AI will asnwer to you message " +
+              "Hi.. I'm Basim, AI will asnwer to your message  " +
               msg_body +
-              "As Soon As possible",
+              "..As Soon As possible",
           },
         },
         headers: {

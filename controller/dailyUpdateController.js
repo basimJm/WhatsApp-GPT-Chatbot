@@ -19,7 +19,7 @@ exports.scheduleReminderMessage = async function () {
       console.log(
         `number is ${number.phoneNum} and id is ${number.phoneNumId}`
       );
-      cron.schedule("*/1 * * * *", () => {
+      cron.schedule("0 * * * *", () => {
         checkAndSendReminder(
           message.messageId,
           number.phoneNumId,
@@ -63,7 +63,7 @@ function snedReminderMessage(phoneNumId, phoneNum) {
 exports.schedualeDailyUpdateMessage = async function () {
   let serverTimeZone = "Asia/Amman";
   cron.schedule(
-    "58 02 * * *",
+    "00 09 * * *",
     () => {
       const studentsId = getAllPhoneNumbers();
 
