@@ -2,6 +2,8 @@ const axios = require("axios");
 const cron = require("node-cron");
 const token = process.env.TOKEN;
 
+const messageModel = require("../model/botMessageModel");
+
 const { getAllPhoneNumbers, findNumberId } = require("./phoneController");
 const {
   saveMessageId,
@@ -48,9 +50,7 @@ function snedReminderMessage(number) {
 
 function getMessageStatus(messageId) {
   return new Promise((resolve, reject) => {
-    // Code to retrieve status from MongoDB, replace with your actual implementation
-    // For example, if using Mongoose:
-    YourMessageModel.findById(messageId, (err, message) => {
+    messageModel.findByone(messageId, (err, message) => {
       if (err) {
         reject(err);
       } else {
@@ -66,7 +66,7 @@ function checkMessageStatus(messageId, number) {
       console.log("Message has been read, no reminder needed.");
     } else {
       console.log("Sending reminder message...");
-      sendReminderMessage(number);
+      snedReminderMessage(number);
     }
   });
 }
