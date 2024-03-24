@@ -17,13 +17,10 @@ exports.schedualeReminderMessage = async function () {
           console.log(
             `number is ${number.phoneNum} and id is ${number.phoneNumId}`
           );
-          cron.schedule("*/2 * * * *", () => {
-            snedReminderMessage(number);
-            return;
+          cron.schedule("*/1 * * * *", () => {
+            checkMessageStatus(it._id, number);
           });
         });
-      } else {
-        return;
       }
     });
   });
@@ -46,6 +43,31 @@ function snedReminderMessage(number) {
     },
   }).then((response) => {
     console.log(`response is ${JSON.stringify(response.data, null, 2)}`);
+  });
+}
+
+function getMessageStatus(messageId) {
+  return new Promise((resolve, reject) => {
+    // Code to retrieve status from MongoDB, replace with your actual implementation
+    // For example, if using Mongoose:
+    YourMessageModel.findById(messageId, (err, message) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(message.status);
+      }
+    });
+  });
+}
+
+function checkMessageStatus(messageId, number) {
+  getMessageStatus(messageId).then((status) => {
+    if (status === "read") {
+      console.log("Message has been read, no reminder needed.");
+    } else {
+      console.log("Sending reminder message...");
+      sendReminderMessage(number);
+    }
   });
 }
 
