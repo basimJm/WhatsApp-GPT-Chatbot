@@ -10,21 +10,35 @@ const {
   getAllDailyMessages,
 } = require("./botMessageController");
 
-exports.schedualeReminderMessage = async function () {
+exports.scheduleReminderMessage = async function () {
   const messages = await getAllDailyMessages();
 
-  messages.forEach(async (it) => {
-    if (it.status === "delivered" || it.status === "sent") {
-      const number = await findNumberId(it.receiverId);
+  for (const message of messages) {
+    if (message.status === "delivered" || message.status === "sent") {
+      const number = await findNumberId(message.receiverId);
       console.log(
         `number is ${number.phoneNum} and id is ${number.phoneNumId}`
       );
       cron.schedule("*/1 * * * *", () => {
-        snedReminderMessage(number.phoneNumId, number.phoneNum);
+        checkAndSendReminder(
+          message.messageId,
+          number.phoneNumId,
+          number.phoneNum
+        );
       });
     }
-  });
+  }
 };
+
+async function checkAndSendReminder(messageId, phoneNumId, phoneNum) {
+  const currentMessage = await messageModel.findOne({ messageId: messageId });
+  if (
+    currentMessage.status === "delivered" ||
+    currentMessage.status === "sent"
+  ) {
+    snedReminderMessage(phoneNumId, phoneNum);
+  }
+}
 function snedReminderMessage(phoneNumId, phoneNum) {
   axios({
     method: "POST",

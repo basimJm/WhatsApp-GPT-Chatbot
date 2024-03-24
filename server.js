@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const dbConnection = require("./dbConnection");
 
 const {
-  schedualeReminderMessage,
+  scheduleReminderMessage,
   schedualeDailyUpdateMessage,
 } = require("./controller/dailyUpdateController");
 const webhookRoute = require("./route/webhookRoute");
@@ -22,4 +22,4 @@ app.listen(process.env.PORT || 5000, () => {
 app.use("/webhook", webhookRoute);
 
 schedualeDailyUpdateMessage();
-schedualeReminderMessage();
+scheduleReminderMessage();
