@@ -20,8 +20,7 @@ exports.schedualeReminderMessage = async function () {
             `number is ${number.phoneNum} and id is ${number.phoneNumId}`
           );
           cron.schedule("*/1 * * * *", () => {
-            snedReminderMessage(number);
-            console.log("reminder message sent ");
+            checkMessageStatus(it._id, number);
           });
         });
       }
@@ -46,6 +45,29 @@ function snedReminderMessage(number) {
     },
   }).then((response) => {
     console.log(`response is ${JSON.stringify(response.data, null, 2)}`);
+  });
+}
+
+function getMessageStatus(messageId) {
+  return new Promise((resolve, reject) => {
+    messageModel.findOne({ messageId: messageId }, (err, message) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(message.status);
+      }
+    });
+  });
+}
+
+function checkMessageStatus(messageId, number) {
+  getMessageStatus(messageId).then((status) => {
+    if (status === "read") {
+      console.log("Message has been read, no reminder needed.");
+    } else {
+      console.log("Sending reminder message...");
+      snedReminderMessage(number);
+    }
   });
 }
 
