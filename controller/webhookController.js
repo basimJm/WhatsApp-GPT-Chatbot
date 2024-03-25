@@ -1,9 +1,22 @@
 const token = process.env.TOKEN;
 const mytoken = process.env.MYTOKEN;
 const axios = require("axios");
+const OpenAi = require("openai");
 
 const { saveNumber } = require("./phoneController");
 const { updateStatus } = require("./botMessageController");
+const openai = new OpenAi({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+async function aiAnswer(question) {
+  const chatCompletion = await openai.chat.completions.create({
+    messages: [
+      { role: "user", content: `just answer this question please ${question}` },
+    ],
+    model: "gpt-3.5-turbo",
+  });
+  return chatCompletion.choices[0].message.content;
+}
 
 exports.getWebhookMessage = async (req, res) => {
   let mode = req.query["hub.mode"];
@@ -57,7 +70,7 @@ exports.postWeebhook = async (req, res) => {
       console.log("phone number " + phon_no_id);
       console.log("from " + from);
       console.log("boady param " + msg_body);
-
+      const aiMessage = await aiAnswer(msg_body);
       saveNumber(from, phon_no_id);
       axios({
         method: "POST",
@@ -70,10 +83,7 @@ exports.postWeebhook = async (req, res) => {
           messaging_product: "whatsapp",
           to: from,
           text: {
-            body:
-              "Hi.. I'm Basim, AI will asnwer to your message  " +
-              msg_body +
-              "..As Soon As possible",
+            body: msg_body,
           },
         },
         headers: {
