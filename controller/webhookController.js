@@ -83,7 +83,7 @@ exports.postWeebhook = async (req, res) => {
           messaging_product: "whatsapp",
           to: from,
           text: {
-            body: msg_body,
+            body: aiMessage,
           },
         },
         headers: {
