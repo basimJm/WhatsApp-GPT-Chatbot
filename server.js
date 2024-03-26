@@ -132,25 +132,25 @@ app.use("/webhook", webhookRoute);
 //   }
 // })();
 
-// app.post("/confirm-payment", async (req, res) => {
-//   const { paymentIntentId, paymentMethodId, returnUrl } = req.body;
+app.post("/confirm-payment", async (req, res) => {
+  const { paymentIntentId, paymentMethodId, returnUrl } = req.body;
 
-//   try {
-//     const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
-//       payment_method: paymentMethodId,
-//       return_url: returnUrl,
-//     });
+  try {
+    const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
+      payment_method: paymentMethodId,
+      return_url: returnUrl,
+    });
 
-//     // If the operation was successful, send back the paymentIntent details
-//     res.json({
-//       paymentIntentId: paymentIntent.id,
-//       status: paymentIntent.status,
-//     });
-//   } catch (err) {
-//     // In case of an error, send back a descriptive message
-//     res.status(500).json({ error: err.message });
-//   }
-// });
+    // If the operation was successful, send back the paymentIntent details
+    res.json({
+      paymentIntentId: paymentIntent.id,
+      status: paymentIntent.status,
+    });
+  } catch (err) {
+    // In case of an error, send back a descriptive message
+    res.status(500).json({ error: err.message });
+  }
+});
 app.post(
   "/payment-webhook",
   express.raw({ type: "application/json" }),
