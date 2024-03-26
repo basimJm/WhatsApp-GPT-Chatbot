@@ -21,7 +21,8 @@
     "mongoose": "^8.2.2",
     "node-cron": "^3.0.3",
     "nodemon": "^3.1.0",
-    "openai": "^4.29.2"
+    "openai": "^4.29.2",
+    "stripe": "^14.22.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
