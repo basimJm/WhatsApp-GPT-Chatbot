@@ -16,31 +16,6 @@ const app = express().use(bodyParser.json());
 
 dbConnection();
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log("webhook is listening");
-});
-
-app.use("/webhook", webhookRoute);
-
-app.post("/confirm-payment", async (req, res) => {
-  const { paymentIntentId, paymentMethodId, returnUrl } = req.body;
-
-  try {
-    const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
-      payment_method: paymentMethodId,
-      return_url: returnUrl,
-    });
-
-    // If the operation was successful, send back the paymentIntent details
-    res.json({
-      paymentIntentId: paymentIntent.id,
-      status: paymentIntent.status,
-    });
-  } catch (err) {
-    // In case of an error, send back a descriptive message
-    res.status(500).json({ error: err.message });
-  }
-});
 app.post(
   "/payment-webhook",
   express.raw({ type: "application/json" }),
@@ -80,6 +55,34 @@ app.post(
     res.send();
   }
 );
+
+app.use(express.json());
+
+app.listen(process.env.PORT || 5000, () => {
+  console.log("webhook is listening");
+});
+
+app.use("/webhook", webhookRoute);
+
+app.post("/confirm-payment", async (req, res) => {
+  const { paymentIntentId, paymentMethodId, returnUrl } = req.body;
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
+      payment_method: paymentMethodId,
+      return_url: returnUrl,
+    });
+
+    // If the operation was successful, send back the paymentIntent details
+    res.json({
+      paymentIntentId: paymentIntent.id,
+      status: paymentIntent.status,
+    });
+  } catch (err) {
+    // In case of an error, send back a descriptive message
+    res.status(500).json({ error: err.message });
+  }
+});
+
 schedualeDailyUpdateMessage();
 scheduleReminderMessage();
-app.use(express.json());
