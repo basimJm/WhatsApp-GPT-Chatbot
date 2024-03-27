@@ -15,7 +15,7 @@ dotenv.config({ path: "config.env" });
 const app = express().use(bodyParser.json());
 
 dbConnection();
-app.use(express.json());
+
 app.listen(process.env.PORT || 5000, () => {
   console.log("webhook is listening");
 });
@@ -82,3 +82,4 @@ app.post(
 );
 schedualeDailyUpdateMessage();
 scheduleReminderMessage();
+app.use(express.json());
