@@ -12,7 +12,7 @@ const webhookRoute = require("./route/webhookRoute");
 const dotenv = require("dotenv");
 dotenv.config({ path: "config.env" });
 
-const app = express().use(bodyParser.json());
+// const app = express().use(bodyParser.json());
 
 dbConnection();
 
