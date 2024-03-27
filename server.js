@@ -12,8 +12,7 @@ const webhookRoute = require("./route/webhookRoute");
 const dotenv = require("dotenv");
 dotenv.config({ path: "config.env" });
 
-// const app = express().use(bodyParser.json());
-
+const app = express();
 dbConnection();
 
 app.post(
@@ -55,6 +54,9 @@ app.post(
     res.send();
   }
 );
+
+app.use(bodyParser.json());
+app.use(express.json());
 
 app.listen(process.env.PORT || 5000, () => {
   console.log("webhook is listening");
