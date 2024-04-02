@@ -41,11 +41,11 @@ exports.postWeebhook = async (req, res) => {
 
   if (hasStatuses) {
     console.log("The body contains statuses");
-    body_param.entry.forEach((entry) => {
-      entry.changes.forEach((change) => {
-        change.value.statuses.forEach((status) => {
+    body_param.entry.forEach(async (entry) => {
+      entry.changes.forEach(async (change) => {
+        change.value.statuses.forEach(async (status) => {
           if (status.status !== "status") {
-            updateStatus(status.id, status.status);
+            await updateStatus(status.id, status.status);
           }
         });
       });
@@ -71,7 +71,7 @@ exports.postWeebhook = async (req, res) => {
       console.log("from " + from);
       console.log("boady param " + msg_body);
       const aiMessage = await aiAnswer(msg_body);
-      saveNumber(from, phon_no_id);
+      await saveNumber(from, phon_no_id);
       axios({
         method: "POST",
         url:
