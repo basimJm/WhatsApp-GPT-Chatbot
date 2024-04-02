@@ -32,7 +32,7 @@ exports.getWebhookMessage = async (req, res) => {
   }
 };
 
-exports.postWeebhook = async (req, res) => {
+exports.postWeebhook = async (req, res, next) => {
   let body_param = req.body;
 
   const hasStatuses = body_param.entry.some((entry) =>
@@ -71,7 +71,7 @@ exports.postWeebhook = async (req, res) => {
       console.log("from " + from);
       console.log("boady param " + msg_body);
       const aiMessage = await aiAnswer(msg_body);
-      await saveNumber(from, phon_no_id);
+      await saveNumber(from, phon_no_id, next);
       axios({
         method: "POST",
         url:
