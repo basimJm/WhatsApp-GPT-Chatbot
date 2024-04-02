@@ -1,5 +1,5 @@
 const phone = require("../model/phoneModel");
-const ApiError = require("../utils/apiError");
+const ApiError = require("../utils/apiError")
 
 exports.saveNumber = async function (number, phoneNumId, next) {
   const isNumberUsed = await phone.findOne({ phoneNum: number });
