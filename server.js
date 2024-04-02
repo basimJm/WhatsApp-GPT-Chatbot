@@ -2,7 +2,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const dbConnection = require("./dbConnection");
 const stripe = require("stripe")(process.env.STRIP_SECRET_KEY);
-const ApiError = require("./utils/apiError");
 const globalError = require("./middleware/errorMiddleware");
 
 const {
@@ -10,7 +9,6 @@ const {
   schedualeDailyUpdateMessage,
 } = require("./controller/dailyUpdateController");
 const webhookRoute = require("./route/webhookRoute");
-const testRoute = require("./route/testRoute");
 
 const dotenv = require("dotenv");
 dotenv.config({ path: "config.env" });
@@ -63,7 +61,6 @@ app.use(bodyParser.json());
 app.use(express.json());
 
 app.use("/webhook", webhookRoute);
-app.use("/test", testRoute);
 
 schedualeDailyUpdateMessage();
 scheduleReminderMessage();
@@ -71,13 +68,6 @@ scheduleReminderMessage();
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`, req.body);
   next();
-});
-
-//Handle unhandled route
-app.all("*", (req, res, next) => {
-  //   const err = new Error(`cant fing this route ${req.originalUrl}`);
-  //  next(err.message); // this next will send the error to global error handle middleWare
-  next(new ApiError(`cant find this route ${req.originalUrl}`, 400)); // this next will send the error to global error handle middleWare
 });
 
 app.listen(PORT, () => {
