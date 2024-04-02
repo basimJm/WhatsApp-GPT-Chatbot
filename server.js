@@ -2,15 +2,19 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const dbConnection = require("./dbConnection");
 const stripe = require("stripe")(process.env.STRIP_SECRET_KEY);
+const ApiError = require("./utils/apiError");
+const globalError = require("./middleware/errorMiddleware");
 
 const {
   scheduleReminderMessage,
   schedualeDailyUpdateMessage,
 } = require("./controller/dailyUpdateController");
 const webhookRoute = require("./route/webhookRoute");
+const testRoute = require("./route/testRoute");
 
 const dotenv = require("dotenv");
 dotenv.config({ path: "config.env" });
+const PORT = process.env.PORT || 5648;
 
 const app = express();
 dbConnection();
@@ -58,31 +62,36 @@ app.post(
 app.use(bodyParser.json());
 app.use(express.json());
 
-app.listen(process.env.PORT || 5000, () => {
-  console.log("webhook is listening");
-});
-
 app.use("/webhook", webhookRoute);
-
-app.post("/confirm-payment", async (req, res) => {
-  const { paymentIntentId, paymentMethodId, returnUrl } = req.body;
-
-  try {
-    const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
-      payment_method: paymentMethodId,
-      return_url: returnUrl,
-    });
-
-    // If the operation was successful, send back the paymentIntent details
-    res.json({
-      paymentIntentId: paymentIntent.id,
-      status: paymentIntent.status,
-    });
-  } catch (err) {
-    // In case of an error, send back a descriptive message
-    res.status(500).json({ error: err.message });
-  }
-});
+app.use("/test", testRoute);
 
 schedualeDailyUpdateMessage();
 scheduleReminderMessage();
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`, req.body);
+  next();
+});
+
+//Handle unhandled route
+app.all("*", (req, res, next) => {
+  //   const err = new Error(`cant fing this route ${req.originalUrl}`);
+  //  next(err.message); // this next will send the error to global error handle middleWare
+  next(new ApiError(`cant find this route ${req.originalUrl}`, 400)); // this next will send the error to global error handle middleWare
+});
+
+app.listen(PORT, () => {
+  console.log(`server run at PORT : ${PORT}`);
+});
+
+//Global error handiling middleware for express
+app.use(globalError);
+
+//Events => Listener => callback(err) when show any error out of express make event we just want to make listener for this error and send it with call back to catch it
+process.on("unhandledRejection", (err) => {
+  console.error(`UnHandled Error: ${err}`);
+  server.close(() => {
+    console.error(`shutting down...`);
+    process.exit(1);
+  });
+});
