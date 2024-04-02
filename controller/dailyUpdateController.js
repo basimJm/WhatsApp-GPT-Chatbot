@@ -19,8 +19,8 @@ exports.scheduleReminderMessage = async function () {
       console.log(
         `number is ${number.phoneNum} and id is ${number.phoneNumId}`
       );
-      cron.schedule("0 * * * *", () => {
-        checkAndSendReminder(
+      cron.schedule("0 * * * *", async () => {
+        await checkAndSendReminder(
           message.messageId,
           number.phoneNumId,
           number.phoneNum
@@ -36,10 +36,10 @@ async function checkAndSendReminder(messageId, phoneNumId, phoneNum) {
     currentMessage.status === "delivered" ||
     currentMessage.status === "sent"
   ) {
-    snedReminderMessage(phoneNumId, phoneNum);
+    await snedReminderMessage(phoneNumId, phoneNum);
   }
 }
-function snedReminderMessage(phoneNumId, phoneNum) {
+async function snedReminderMessage(phoneNumId, phoneNum) {
   axios({
     method: "POST",
     url:
@@ -64,12 +64,15 @@ exports.schedualeDailyUpdateMessage = async function () {
   let serverTimeZone = "Asia/Amman";
   cron.schedule(
     "00 09 * * *",
-    () => {
-      const studentsId = getAllPhoneNumbers();
+    async () => {
+      const studentsId = await getAllPhoneNumbers();
 
-      studentsId.then((students) => {
-        students.forEach((studendId) => {
-          sendDailyUpdateMessage(studendId.phoneNumId, studendId.phoneNum);
+      studentsId.then(async (students) => {
+        students.forEach(async (studendId) => {
+          await sendDailyUpdateMessage(
+            studendId.phoneNumId,
+            studendId.phoneNum
+          );
         });
       });
 
@@ -81,7 +84,7 @@ exports.schedualeDailyUpdateMessage = async function () {
     }
   );
 };
-function sendDailyUpdateMessage(phoneNumId, phoneNum) {
+async function sendDailyUpdateMessage(phoneNumId, phoneNum) {
   axios({
     method: "POST",
     url:
