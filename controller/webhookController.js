@@ -2,8 +2,8 @@ const token = process.env.TOKEN;
 const mytoken = process.env.MYTOKEN;
 const axios = require("axios");
 const OpenAi = require("openai");
-const userModel = require("./model/phoneModel");
-const ChatHistoryModel = require("./model/chatHistorymodel");
+const userModel = require("../model/phoneModel");
+const ChatHistoryModel = require("../model/chatHistorymodel");
 
 const { saveNumber } = require("./phoneController");
 const { updateStatus } = require("./botMessageController");
@@ -24,10 +24,10 @@ async function aiAnswer(question, phoneNum) {
   });
 
   let x;
-  for (let name of chatHistoryMessages) {
-    if (name.userMessage === question) {
-      console.log(`answer from DB : ${name.aiMessage}`);
-      x = name.aiMessage;
+  for (let aiMsg of chatHistoryMessages) {
+    if (aiMsg.userMessage === question) {
+      console.log(`answer from DB : ${aiMsg.aiMessage}`);
+      x = aiMsg.aiMessage;
       break;
     }
   }
