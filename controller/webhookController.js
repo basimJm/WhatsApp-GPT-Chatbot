@@ -13,67 +13,92 @@ const openai = new OpenAi({
 });
 
 async function aiAnswer(question, phoneNum, next) {
-  const user = await userModel
-    .findOne({ phoneNum: phoneNum })
-    .populate("chatHistory");
+  let user;
+  try {
+    user = await userModel
+      .findOne({ phoneNum: phoneNum })
+      .populate("chatHistory");
+  } catch (error) {
+    next(new ApiError("Database error while retrieving user.", 500));
+    return;
+  }
 
   if (!user) {
-    next(new ApiError("user not found", 404));
-    console.log("User not found");
-  }
-  const chatHistoryMessages = await ChatHistoryModel.find({
-    _id: { $in: user.chatHistory },
-  });
-
-  if (!chatHistoryMessages) {
-    next(new ApiError("Hisotry empty", 404));
+    next(new ApiError("User not found", 404));
+    return;
   }
 
-  // let retrunedMessage;
-  // for (let aiMsg of chatHistoryMessages) {
-  //   if (aiMsg.userMessage === question) {
-  //     console.log(`answer from DB : ${aiMsg.aiMessage}`);
-  //     retrunedMessage = aiMsg.aiMessage;
-  //     break;
-  //   }
-  // }
+  let chatHistoryMessages;
+  try {
+    chatHistoryMessages = await ChatHistoryModel.find({
+      _id: { $in: user.chatHistory },
+    });
+  } catch (error) {
+    next(new ApiError("Database error while retrieving chat history.", 500));
+    return;
+  }
 
-  // if (retrunedMessage !== null || retrunedMessage!=="") {
-  //   return retrunedMessage;
-  // } else {
-  const message = user.chatHistory.flatMap((msg) => [
-    {
-      role: "user",
-      content: msg.userMessage,
-    },
-    {
-      role: "assistant",
-      content: msg.aiMessage,
-    },
-  ]);
+  if (!chatHistoryMessages || chatHistoryMessages.length === 0) {
+    next(new ApiError("History empty", 404));
+    return;
+  }
 
-  message.push({ role: "user", content: question });
+  let returnedMessage = null;
+  for (let aiMsg of chatHistoryMessages) {
+    if (aiMsg.userMessage === question) {
+      console.log(`Answer from DB: ${aiMsg.aiMessage}`);
+      returnedMessage = aiMsg.aiMessage;
+      break;
+    }
+  }
 
-  const chatCompletion = await openai.chat.completions.create({
-    messages: message,
-    model: "gpt-3.5-turbo",
-  });
-  const aiMessage = chatCompletion.choices[0].message.content;
+  if (returnedMessage !== null && returnedMessage !== "") {
+    return returnedMessage;
+  } else {
+    const message = user.chatHistory.flatMap((msg) => [
+      {
+        role: "user",
+        content: msg.userMessage,
+      },
+      {
+        role: "assistant",
+        content: msg.aiMessage,
+      },
+    ]);
 
-  const newChatHistory = {
-    userMessage: question,
-    aiMessage: aiMessage,
-  };
+    message.push({ role: "user", content: question });
 
-  const newChats = await ChatHistoryModel.create(newChatHistory);
+    let chatCompletion;
+    try {
+      chatCompletion = await openai.chat.completions.create({
+        messages: message,
+        model: "gpt-3.5-turbo",
+      });
+    } catch (error) {
+      next(new ApiError("Error communicating with OpenAI API.", 500));
+      return;
+    }
 
-  user.chatHistory.push(newChats);
+    const aiMessage = chatCompletion.choices[0].message.content;
 
-  await user.save();
+    const newChatHistory = {
+      userMessage: question,
+      aiMessage: aiMessage,
+    };
 
-  return aiMessage;
+    let newChats;
+    try {
+      newChats = await ChatHistoryModel.create(newChatHistory);
+      user.chatHistory.push(newChats);
+      await user.save();
+    } catch (error) {
+      next(new ApiError("Error saving new chat history.", 500));
+      return;
+    }
+
+    return aiMessage;
+  }
 }
-// }
 
 exports.getWebhookMessage = async (req, res) => {
   let mode = req.query["hub.mode"];
