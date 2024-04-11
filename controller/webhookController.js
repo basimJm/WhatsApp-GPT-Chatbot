@@ -19,13 +19,11 @@ async function aiAnswer(question, phoneNum, next) {
       .findOne({ phoneNum: phoneNum })
       .populate("chatHistory");
   } catch (error) {
-    next(new ApiError("Database error while retrieving user.", 500));
-    return;
+    return next(new ApiError("Database error while retrieving user.", 500));
   }
 
   if (!user) {
-    next(new ApiError("User not found", 404));
-    return;
+    return next(new ApiError("User not found", 404));
   }
 
   let chatHistoryMessages;
@@ -34,13 +32,13 @@ async function aiAnswer(question, phoneNum, next) {
       _id: { $in: user.chatHistory },
     });
   } catch (error) {
-    next(new ApiError("Database error while retrieving chat history.", 500));
-    return;
+    return next(
+      new ApiError("Database error while retrieving chat history.", 500)
+    );
   }
 
   if (!chatHistoryMessages || chatHistoryMessages.length === 0) {
-    next(new ApiError("History empty", 404));
-    return;
+    return next(new ApiError("History empty", 404));
   }
 
   let returnedMessage = null;
@@ -75,8 +73,7 @@ async function aiAnswer(question, phoneNum, next) {
         model: "gpt-3.5-turbo",
       });
     } catch (error) {
-      next(new ApiError("Error communicating with OpenAI API.", 500));
-      return;
+      return next(new ApiError("Error communicating with OpenAI API.", 500));
     }
 
     const aiMessage = chatCompletion.choices[0].message.content;
@@ -86,20 +83,17 @@ async function aiAnswer(question, phoneNum, next) {
       aiMessage: aiMessage,
     };
 
-    let newChats;
     try {
-      newChats = await ChatHistoryModel.create(newChatHistory);
+      let newChats = await ChatHistoryModel.create(newChatHistory);
       user.chatHistory.push(newChats);
       await user.save();
     } catch (error) {
-      next(new ApiError("Error saving new chat history.", 500));
-      return;
+      return next(new ApiError("Error saving new chat history.", 500));
     }
 
     return aiMessage;
   }
 }
-
 exports.getWebhookMessage = async (req, res) => {
   let mode = req.query["hub.mode"];
   let challange = req.query["hub.challenge"];
