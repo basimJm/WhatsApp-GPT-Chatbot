@@ -4,6 +4,7 @@ const axios = require("axios");
 const OpenAi = require("openai");
 const userModel = require("../model/phoneModel");
 const ChatHistoryModel = require("../model/chatHistorymodel");
+const ApiError = require("../utils/apiError");
 
 const { saveNumber } = require("./phoneController");
 const { updateStatus } = require("./botMessageController");
@@ -11,17 +12,22 @@ const openai = new OpenAi({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function aiAnswer(question, phoneNum) {
+async function aiAnswer(question, phoneNum, next) {
   const user = await userModel
     .findOne({ phoneNum: phoneNum })
     .populate("chatHistory");
 
   if (!user) {
+    next(new ApiError("user not found", 404));
     console.log("User not found");
   }
   const chatHistoryMessages = await ChatHistoryModel.find({
     _id: { $in: user.chatHistory },
   });
+
+  if (!chatHistoryMessages) {
+    next(new ApiError("Hisotry empty", 404));
+  }
 
   // let retrunedMessage;
   // for (let aiMsg of chatHistoryMessages) {
