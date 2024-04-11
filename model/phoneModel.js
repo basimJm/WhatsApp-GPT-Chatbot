@@ -8,6 +8,12 @@ const userSchema = new mongoose.Schema({
   phoneNumId: {
     type: String,
   },
+  chatHistory: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ChatHistory",
+    },
+  ],
 });
 
 const userModel = mongoose.model("UserNumber", userSchema);

@@ -2,20 +2,71 @@ const token = process.env.TOKEN;
 const mytoken = process.env.MYTOKEN;
 const axios = require("axios");
 const OpenAi = require("openai");
+const userModel = require("./model/phoneModel");
+const ChatHistoryModel = require("./model/chatHistorymodel");
 
 const { saveNumber } = require("./phoneController");
 const { updateStatus } = require("./botMessageController");
 const openai = new OpenAi({
   apiKey: process.env.OPENAI_API_KEY,
 });
-async function aiAnswer(question) {
-  const chatCompletion = await openai.chat.completions.create({
-    messages: [
-      { role: "user", content: `just answer this question please ${question}` },
-    ],
-    model: "gpt-3.5-turbo",
+
+async function aiAnswer(question, phoneNum) {
+  const user = await userModel
+    .findOne({ phoneNum: phoneNum })
+    .populate("chatHistory");
+
+  if (!user) {
+    console.log("User not found");
+  }
+  const chatHistoryMessages = await ChatHistoryModel.find({
+    _id: { $in: user.chatHistory },
   });
-  return chatCompletion.choices[0].message.content;
+
+  let x;
+  for (let name of chatHistoryMessages) {
+    if (name.userMessage === question) {
+      console.log(`answer from DB : ${name.aiMessage}`);
+      x = name.aiMessage;
+      break;
+    }
+  }
+
+  if (x !== "") {
+    return x;
+  } else {
+    const message = user.chatHistory.flatMap((msg) => [
+      {
+        role: "user",
+        content: msg.userMessage,
+      },
+      {
+        role: "assistant",
+        content: msg.aiMessage,
+      },
+    ]);
+
+    message.push({ role: "user", content: question });
+
+    const chatCompletion = await openai.chat.completions.create({
+      messages: message,
+      model: "gpt-3.5-turbo",
+    });
+    const aiMessage = chatCompletion.choices[0].message.content;
+
+    const newChatHistory = {
+      userMessage: question,
+      aiMessage: aiMessage,
+    };
+
+    const newChats = await ChatHistoryModel.create(newChatHistory);
+
+    user.chatHistory.push(newChats);
+
+    await user.save();
+
+    return aiMessage;
+  }
 }
 
 exports.getWebhookMessage = async (req, res) => {
@@ -70,7 +121,7 @@ exports.postWeebhook = async (req, res, next) => {
       console.log("phone number " + phon_no_id);
       console.log("from " + from);
       console.log("boady param " + msg_body);
-      const aiMessage = await aiAnswer(msg_body);
+      const aiMessage = await aiAnswer(msg_body, from);
       await saveNumber(from, phon_no_id, next);
       axios({
         method: "POST",
