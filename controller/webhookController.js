@@ -11,62 +11,72 @@ const openai = new OpenAi({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// async function aiAnswer(question, phoneNum) {
+//   const user = await userModel
+//     .findOne({ phoneNum: phoneNum })
+//     .populate("chatHistory");
+
+//   if (!user) {
+//     console.log("User not found");
+//   }
+//   const chatHistoryMessages = await ChatHistoryModel.find({
+//     _id: { $in: user.chatHistory },
+//   });
+
+//   let x;
+//   for (let aiMsg of chatHistoryMessages) {
+//     if (aiMsg.userMessage === question) {
+//       console.log(`answer from DB : ${aiMsg.aiMessage}`);
+//       x = aiMsg.aiMessage;
+//       break;
+//     }
+//   }
+
+//   if (x !== null || x!=="") {
+//     return x;
+//   } else {
+//     const message = user.chatHistory.flatMap((msg) => [
+//       {
+//         role: "user",
+//         content: msg.userMessage,
+//       },
+//       {
+//         role: "assistant",
+//         content: msg.aiMessage,
+//       },
+//     ]);
+
+//     message.push({ role: "user", content: question });
+
+//     const chatCompletion = await openai.chat.completions.create({
+//       messages: message,
+//       model: "gpt-3.5-turbo",
+//     });
+//     const aiMessage = chatCompletion.choices[0].message.content;
+
+//     const newChatHistory = {
+//       userMessage: question,
+//       aiMessage: aiMessage,
+//     };
+
+//     const newChats = await ChatHistoryModel.create(newChatHistory);
+
+//     user.chatHistory.push(newChats);
+
+//     await user.save();
+
+//     return aiMessage;
+//   }
+// }
+
 async function aiAnswer(question, phoneNum) {
-  const user = await userModel
-    .findOne({ phoneNum: phoneNum })
-    .populate("chatHistory");
-
-  if (!user) {
-    console.log("User not found");
-  }
-  const chatHistoryMessages = await ChatHistoryModel.find({
-    _id: { $in: user.chatHistory },
+  const chatCompletion = await openai.chat.completions.create({
+    messages: [
+      { role: "user", content: `just answer this question please ${question}` },
+    ],
+    model: "gpt-3.5-turbo",
   });
-
-  let x;
-  for (let aiMsg of chatHistoryMessages) {
-    if (aiMsg.userMessage === question) {
-      console.log(`answer from DB : ${aiMsg.aiMessage}`);
-      x = aiMsg.aiMessage;
-      break;
-    }
-  }
-
-  if (x !== "") {
-    return x;
-  } else {
-    const message = user.chatHistory.flatMap((msg) => [
-      {
-        role: "user",
-        content: msg.userMessage,
-      },
-      {
-        role: "assistant",
-        content: msg.aiMessage,
-      },
-    ]);
-
-    message.push({ role: "user", content: question });
-
-    const chatCompletion = await openai.chat.completions.create({
-      messages: message,
-      model: "gpt-3.5-turbo",
-    });
-    const aiMessage = chatCompletion.choices[0].message.content;
-
-    const newChatHistory = {
-      userMessage: question,
-      aiMessage: aiMessage,
-    };
-
-    const newChats = await ChatHistoryModel.create(newChatHistory);
-
-    user.chatHistory.push(newChats);
-
-    await user.save();
-
-    return aiMessage;
-  }
+  return chatCompletion.choices[0].message.content;
 }
 
 exports.getWebhookMessage = async (req, res) => {
