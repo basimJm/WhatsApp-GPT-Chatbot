@@ -107,7 +107,6 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
       console.log("phone number " + phon_no_id);
       console.log("from " + from);
       console.log("boady param " + msg_body);
-      res.setHeader("Content-Type", "application/json");
       await saveNumber(from, phon_no_id, next);
 
       const result = await aiAnswer(msg_body, from);
@@ -127,13 +126,15 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
               body: result.message,
             },
           },
-          // headers: {
-          //   "Content-Type": "application/json",
-          // },
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
+        res.setHeader("Content-Type", "application/json");
         return res.sendStatus(200);
       } catch (err) {
         console.log(`error from axios is : ${err.message}`);
+        next(err);
       }
     }
   }
