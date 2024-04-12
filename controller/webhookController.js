@@ -141,7 +141,7 @@ exports.postWeebhook = async (req, res, next) => {
         return res.status(result.error.status).send(result.error.message);
       }
       try {
-        axios({
+        await axios({
           method: "POST",
           url:
             "https://graph.facebook.com/v13.0/" +
@@ -162,7 +162,11 @@ exports.postWeebhook = async (req, res, next) => {
 
         res.sendStatus(200);
       } catch (err) {
-        console.error("Failed to send message:", err);
+        console.error(
+          "Failed to send message:",
+          err.message,
+          err.response?.data
+        );
         res.sendStatus(500);
       }
     } else {
