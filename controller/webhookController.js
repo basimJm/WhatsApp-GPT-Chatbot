@@ -16,19 +16,10 @@ const openai = new OpenAi({
 async function aiAnswer(question, phoneNum) {
   console.log("open aiAnswer");
   let user;
-  try {
-    user = await userModel
-      .findOne({ phoneNum: phoneNum })
-      .populate("chatHistory");
-  } catch (error) {
-    return {
-      error: new ApiError("Database error while retrieving user.", 500),
-    };
-  }
 
-  if (!user) {
-    return { error: new ApiError("User not found", 404) };
-  }
+  user = await userModel
+    .findOne({ phoneNum: phoneNum })
+    .populate("chatHistory");
 
   const chatHistoryMessages = await ChatHistoryModel.find({
     _id: { $in: user.chatHistory },
@@ -122,36 +113,25 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
 
       const result = await aiAnswer(msg_body, from);
 
-      try {
-        await axios({
-          method: "POST",
-          url:
-            "https://graph.facebook.com/v13.0/" +
-            phon_no_id +
-            "/messages?access_token=" +
-            token,
-          data: {
-            messaging_product: "whatsapp",
-            to: from,
-            text: {
-              body: result.message,
-            },
+      await axios({
+        method: "POST",
+        url:
+          "https://graph.facebook.com/v13.0/" +
+          phon_no_id +
+          "/messages?access_token=" +
+          token,
+        data: {
+          messaging_product: "whatsapp",
+          to: from,
+          text: {
+            body: result.message,
           },
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-        return res.sendStatus(200);
-      } catch (err) {
-        console.error(
-          "Failed to send message:",
-          err.message,
-          err.response?.data
-        );
-        return res.sendStatus(200);
-      }
-    } else {
       return res.sendStatus(200);
     }
   }
