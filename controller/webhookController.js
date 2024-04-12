@@ -75,7 +75,7 @@ exports.getWebhookMessage = asyncHandler(async (req, res) => {
     if (mode === "subscribe" && token === mytoken) {
       res.status(200).send(challange);
     } else {
-      res.status(403);
+      res.status(200);
     }
   }
 });
@@ -154,7 +154,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
         return next(new ApiError("there is error in axios", 200));
       }
     } else {
-      res.sendStatus(404);
+      res.sendStatus(200);
     }
   }
 });
