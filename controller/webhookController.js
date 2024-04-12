@@ -21,54 +21,54 @@ async function aiAnswer(msg_body, phoneNum, next) {
   if (!user) {
     return next(new ApiError("User not found", 404));
   }
-  // const chatHistoryMessages = await ChatHistoryModel.find({
-  //   _id: { $in: user.chatHistory },
-  // });
-
-  // let dbAnswer = "";
-  // for (let storedMessage of chatHistoryMessages) {
-  //   if (storedMessage.userMessage === msg_body) {
-  //     console.log(`answer from DB : ${storedMessage.aiMessage}`);
-  //     dbAnswer = storedMessage.aiMessage;
-  //     break;
-  //   }
-  // }
-
-  // if (dbAnswer !== "" || dbAnswer !== null) {
-  //   return dbAnswer;
-  // }
-
-  const message = user.chatHistory.flatMap((msg) => [
-    {
-      role: "user",
-      content: msg.userMessage,
-    },
-    {
-      role: "assistant",
-      content: msg.aiMessage,
-    },
-  ]);
-
-  message.push({ role: "user", content: msg_body });
-
-  const chatCompletion = await openai.chat.completions.create({
-    messages: message,
-    model: "gpt-3.5-turbo",
+  const chatHistoryMessages = await ChatHistoryModel.find({
+    _id: { $in: user.chatHistory },
   });
-  const aiMessage = chatCompletion.choices[0].message.content;
 
-  const newChatHistory = {
-    userMessage: msg_body,
-    aiMessage: aiMessage,
-  };
+  let dbAnswer = "";
+  for (let storedMessage of chatHistoryMessages) {
+    if (storedMessage.userMessage === msg_body) {
+      console.log(`answer from DB : ${storedMessage.aiMessage}`);
+      dbAnswer = storedMessage.aiMessage;
+      break;
+    }
+  }
 
-  const newChats = await ChatHistoryModel.create(newChatHistory);
+  if (dbAnswer !== "" || dbAnswer !== null) {
+    return dbAnswer;
+  }
 
-  user.chatHistory.push(newChats);
+  // const message = user.chatHistory.flatMap((msg) => [
+  //   {
+  //     role: "user",
+  //     content: msg.userMessage,
+  //   },
+  //   {
+  //     role: "assistant",
+  //     content: msg.aiMessage,
+  //   },
+  // ]);
 
-  await user.save();
+  // message.push({ role: "user", content: msg_body });
 
-  return chatCompletion.choices[0].message.content;
+  // const chatCompletion = await openai.chat.completions.create({
+  //   messages: message,
+  //   model: "gpt-3.5-turbo",
+  // });
+  // const aiMessage = chatCompletion.choices[0].message.content;
+
+  // const newChatHistory = {
+  //   userMessage: msg_body,
+  //   aiMessage: aiMessage,
+  // };
+
+  // const newChats = await ChatHistoryModel.create(newChatHistory);
+
+  // user.chatHistory.push(newChats);
+
+  // await user.save();
+
+  // return chatCompletion.choices[0].message.content;
 }
 
 exports.getWebhookMessage = async (req, res) => {
