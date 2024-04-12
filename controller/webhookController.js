@@ -40,11 +40,12 @@ async function aiAnswer(question, phoneNum) {
       error: new ApiError("Database error while retrieving chat history.", 500),
     };
   }
-
+  let retarnedMessage;
   for (let aiMsg of chatHistoryMessages) {
     if (aiMsg.userMessage === question) {
       console.log(`Answer from DB: ${aiMsg.aiMessage}`);
-      return { message: aiMsg.aiMessage };
+      retarnedMessage = `answer from Db is ${aiMsg.aiMessage}`;
+      return retarnedMessage;
     }
   }
 
@@ -78,7 +79,7 @@ async function aiAnswer(question, phoneNum) {
     return { error: new ApiError("Error saving new chat history.", 500) };
   }
   console.log(`ai answer done`);
-  return { message: aiMessage };
+  return aiMessage;
 }
 
 exports.getWebhookMessage = asyncHandler(async (req, res) => {
@@ -137,10 +138,6 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
 
       const result = await aiAnswer(msg_body, from);
 
-      if (result.error) {
-        console.error(result.error);
-        return res.status(result.error.status).send(result.error.message);
-      }
       try {
         await axios({
           method: "POST",
@@ -153,7 +150,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
             messaging_product: "whatsapp",
             to: from,
             text: {
-              body: result.message,
+              body: result,
             },
           },
           headers: {
