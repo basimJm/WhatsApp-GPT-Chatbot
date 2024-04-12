@@ -110,6 +110,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
       await saveNumber(from, phon_no_id, next);
 
       const result = await aiAnswer(msg_body, from);
+      res.setHeader("Content-Type", "application/json");
       try {
         await axios({
           method: "POST",
