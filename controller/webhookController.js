@@ -13,6 +13,7 @@ const openai = new OpenAi({
 });
 
 async function aiAnswer(question, phoneNum) {
+  console.log("open aiAnswer");
   let user;
   try {
     user = await userModel
@@ -63,6 +64,7 @@ async function aiAnswer(question, phoneNum) {
   }
 
   const aiMessage = chatCompletion.choices[0].message.content;
+  console.log(`aiAnswer opened and asnwer is ${aiMessage}`);
 
   try {
     let newChats = await ChatHistoryModel.create({
@@ -74,7 +76,7 @@ async function aiAnswer(question, phoneNum) {
   } catch (error) {
     return { error: new ApiError("Error saving new chat history.", 500) };
   }
-
+  console.log(`ai answer done`);
   return { message: aiMessage };
 }
 
