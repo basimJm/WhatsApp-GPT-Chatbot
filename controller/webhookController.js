@@ -129,6 +129,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
             "Content-Type": "application/json",
           },
         });
+        return res.sendStatus(200);
       } catch (err) {
         console.log(`error from axios is : ${err.message}`);
       }
