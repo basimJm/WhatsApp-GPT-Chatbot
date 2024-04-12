@@ -5,6 +5,7 @@ const OpenAi = require("openai");
 const userModel = require("../model/phoneModel");
 const ChatHistoryModel = require("../model/chatHistorymodel");
 const ApiError = require("../utils/apiError");
+const asyncHandler = require("express-async-handler");
 
 const { saveNumber } = require("./phoneController");
 const { updateStatus } = require("./botMessageController");
@@ -80,7 +81,7 @@ async function aiAnswer(question, phoneNum) {
   return { message: aiMessage };
 }
 
-exports.getWebhookMessage = async (req, res) => {
+exports.getWebhookMessage = asyncHandler(async (req, res) => {
   let mode = req.query["hub.mode"];
   let challange = req.query["hub.challenge"];
   let token = req.query["hub.verify_token"];
@@ -92,9 +93,9 @@ exports.getWebhookMessage = async (req, res) => {
       res.status(403);
     }
   }
-};
+});
 
-exports.postWeebhook = async (req, res, next) => {
+exports.postWeebhook = asyncHandler(async (req, res, next) => {
   let body_param = req.body;
 
   const hasStatuses = body_param.entry.some((entry) =>
@@ -167,10 +168,10 @@ exports.postWeebhook = async (req, res, next) => {
           err.message,
           err.response?.data
         );
-        res.sendStatus(500);
+        return next(new ApiError("there is error in axios", 500));
       }
     } else {
       res.sendStatus(404);
     }
   }
-};
+});
