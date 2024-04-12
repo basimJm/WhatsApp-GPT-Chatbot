@@ -65,8 +65,6 @@ exports.getWebhookMessage = asyncHandler(async (req, res) => {
   if (mode && token) {
     if (mode === "subscribe" && token === mytoken) {
       return res.status(200).send(challange);
-    } else {
-      return res.status(200);
     }
   }
 });
@@ -131,8 +129,6 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
           "Content-Type": "application/json",
         },
       });
-
-      return res.sendStatus(200);
     }
   }
 });
