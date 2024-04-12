@@ -45,7 +45,7 @@ async function aiAnswer(question, phoneNum) {
     if (aiMsg.userMessage === question) {
       console.log(`Answer from DB: ${aiMsg.aiMessage}`);
       retarnedMessage = `answer from Db is ${aiMsg.aiMessage}`;
-      return retarnedMessage;
+      return { message: aiMsg.aiMessage, source: "database" };
     }
   }
 
@@ -79,7 +79,7 @@ async function aiAnswer(question, phoneNum) {
     return { error: new ApiError("Error saving new chat history.", 500) };
   }
   console.log(`ai answer done`);
-  return aiMessage;
+  return { message: aiMessage, source: "ai" };
 }
 
 exports.getWebhookMessage = asyncHandler(async (req, res) => {
@@ -150,7 +150,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
             messaging_product: "whatsapp",
             to: from,
             text: {
-              body: result,
+              body: result.message,
             },
           },
           headers: {
