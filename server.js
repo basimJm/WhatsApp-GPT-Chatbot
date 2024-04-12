@@ -79,9 +79,16 @@ app.use(globalError);
 
 //Events => Listener => callback(err) when show any error out of express make event we just want to make listener for this error and send it with call back to catch it
 process.on("unhandledRejection", (err) => {
-  console.error(`UnHandled Error: ${err}`);
-  server.close(() => {
-    console.error(`shutting down...`);
+  console.error(`Unhandled Rejection: ${err.message}`);
+  if (server) {
+    server.close(() => {
+      console.error(
+        "Server is shutting down due to an unhandled promise rejection."
+      );
+      process.exit(1);
+    });
+  } else {
+    console.error("Server shutdown failed: server instance not available.");
     process.exit(1);
-  });
+  }
 });
