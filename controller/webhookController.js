@@ -159,6 +159,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
         });
 
         res.sendStatus(200);
+        return;
       } catch (err) {
         console.error(
           "Failed to send message:",
