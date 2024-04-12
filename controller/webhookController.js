@@ -30,21 +30,13 @@ async function aiAnswer(question, phoneNum) {
     return { error: new ApiError("User not found", 404) };
   }
 
-  let chatHistoryMessages;
-  try {
-    chatHistoryMessages = await ChatHistoryModel.find({
-      _id: { $in: user.chatHistory },
-    });
-  } catch (error) {
-    return {
-      error: new ApiError("Database error while retrieving chat history.", 500),
-    };
-  }
-  let retarnedMessage;
+  const chatHistoryMessages = await ChatHistoryModel.find({
+    _id: { $in: user.chatHistory },
+  });
+
   for (let aiMsg of chatHistoryMessages) {
     if (aiMsg.userMessage === question) {
       console.log(`Answer from DB: ${aiMsg.aiMessage}`);
-      retarnedMessage = `answer from Db is ${aiMsg.aiMessage}`;
       return { message: aiMsg.aiMessage, source: "database" };
     }
   }
@@ -55,29 +47,21 @@ async function aiAnswer(question, phoneNum) {
   ]);
   message.push({ role: "user", content: question });
 
-  let chatCompletion;
-  try {
-    chatCompletion = await openai.chat.completions.create({
-      messages: message,
-      model: "gpt-3.5-turbo",
-    });
-  } catch (error) {
-    return { error: new ApiError("Error communicating with OpenAI API.", 500) };
-  }
+  const chatCompletion = await openai.chat.completions.create({
+    messages: message,
+    model: "gpt-3.5-turbo",
+  });
 
   const aiMessage = chatCompletion.choices[0].message.content;
   console.log(`aiAnswer opened and asnwer is ${aiMessage}`);
 
-  try {
-    let newChats = await ChatHistoryModel.create({
-      userMessage: question,
-      aiMessage: aiMessage,
-    });
-    user.chatHistory.push(newChats);
-    await user.save();
-  } catch (error) {
-    return { error: new ApiError("Error saving new chat history.", 500) };
-  }
+  const newChats = await ChatHistoryModel.create({
+    userMessage: question,
+    aiMessage: aiMessage,
+  });
+  user.chatHistory.push(newChats);
+  await user.save();
+
   console.log(`ai answer done`);
   return { message: aiMessage, source: "ai" };
 }
