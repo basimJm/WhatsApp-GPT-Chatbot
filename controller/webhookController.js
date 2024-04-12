@@ -123,7 +123,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
       const result = await aiAnswer(msg_body, from);
 
       try {
-        await axios({
+        axios({
           method: "POST",
           url:
             "https://graph.facebook.com/v13.0/" +
