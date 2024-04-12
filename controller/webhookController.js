@@ -122,19 +122,19 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
           data: {
             messaging_product: "whatsapp",
             to: from,
-            text: {
-              body: result.message,
-            },
+            text: { body: result.message },
           },
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         });
-        res.setHeader("Content-Type", "application/json");
-        return res.sendStatus(200);
+        if (!res.headersSent) {
+          res.setHeader("Content-Type", "application/json");
+          res.sendStatus(200);
+        }
       } catch (err) {
         console.log(`error from axios is : ${err.message}`);
-        next(err);
+        if (!res.headersSent) {
+          res.status(500).send({ error: err.message });
+        }
       }
     }
   }
