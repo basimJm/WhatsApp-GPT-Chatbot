@@ -73,9 +73,9 @@ exports.getWebhookMessage = asyncHandler(async (req, res) => {
 
   if (mode && token) {
     if (mode === "subscribe" && token === mytoken) {
-      res.status(200).send(challange);
+      return res.status(200).send(challange);
     } else {
-      res.status(200);
+      return res.status(200);
     }
   }
 });
@@ -142,19 +142,17 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
           },
         });
 
-        res.sendStatus(200);
-        return;
+        return res.sendStatus(200);
       } catch (err) {
         console.error(
           "Failed to send message:",
           err.message,
           err.response?.data
         );
-        res.sendStatus(200);
-        return next(new ApiError("there is error in axios", 200));
+        return res.sendStatus(200);
       }
     } else {
-      res.sendStatus(200);
+      return res.sendStatus(200);
     }
   }
 });
