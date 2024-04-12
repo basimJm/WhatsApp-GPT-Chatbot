@@ -122,36 +122,26 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
 
       const result = await aiAnswer(msg_body, from);
 
-      try {
-        axios({
-          method: "POST",
-          url:
-            "https://graph.facebook.com/v13.0/" +
-            phon_no_id +
-            "/messages?access_token=" +
-            token,
-          data: {
-            messaging_product: "whatsapp",
-            to: from,
-            text: {
-              body: result.message,
-            },
+      await axios({
+        method: "POST",
+        url:
+          "https://graph.facebook.com/v13.0/" +
+          phon_no_id +
+          "/messages?access_token=" +
+          token,
+        data: {
+          messaging_product: "whatsapp",
+          to: from,
+          text: {
+            body: result.message,
           },
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-        res.sendStatus(200);
-        return;
-      } catch (err) {
-        console.error(
-          "Failed to send message:",
-          err.message,
-          err.response?.data
-        );
-        return next(new ApiError("there is error in axios", 500));
-      }
+      res.sendStatus(200);
     } else {
       res.sendStatus(404);
     }
