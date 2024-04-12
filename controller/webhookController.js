@@ -21,22 +21,22 @@ const aiAnswer = asyncHandler(async (question, phoneNum, next) => {
   if (!user) {
     return next(new ApiError("User not found", 404));
   }
-  const chatHistoryMessages = await ChatHistoryModel.find({
-    _id: { $in: user.chatHistory },
-  });
+  // const chatHistoryMessages = await ChatHistoryModel.find({
+  //   _id: { $in: user.chatHistory },
+  // });
 
-  let dbAnswer = "";
-  for (let storedMessage of chatHistoryMessages) {
-    if (storedMessage.userMessage === question) {
-      console.log(`answer from DB : ${storedMessage.aiMessage}`);
-      dbAnswer = storedMessage.aiMessage;
-      break;
-    }
-  }
+  // let dbAnswer = "";
+  // for (let storedMessage of chatHistoryMessages) {
+  //   if (storedMessage.userMessage === question) {
+  //     console.log(`answer from DB : ${storedMessage.aiMessage}`);
+  //     dbAnswer = storedMessage.aiMessage;
+  //     break;
+  //   }
+  // }
 
-  if (dbAnswer !== "" || dbAnswer !== null) {
-    return dbAnswer;
-  }
+  // if (dbAnswer !== "" || dbAnswer !== null) {
+  //   return dbAnswer;
+  // }
 
   const message = user.chatHistory.flatMap((msg) => [
     {
