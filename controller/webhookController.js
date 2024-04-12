@@ -138,26 +138,31 @@ exports.postWeebhook = async (req, res, next) => {
         console.error(result.error);
         return res.status(result.error.status).send(result.error.message);
       }
-      axios({
-        method: "POST",
-        url:
-          "https://graph.facebook.com/v13.0/" +
-          phon_no_id +
-          "/messages?access_token=" +
-          token,
-        data: {
-          messaging_product: "whatsapp",
-          to: from,
-          text: {
-            body: result.message,
+      try {
+        axios({
+          method: "POST",
+          url:
+            "https://graph.facebook.com/v13.0/" +
+            phon_no_id +
+            "/messages?access_token=" +
+            token,
+          data: {
+            messaging_product: "whatsapp",
+            to: from,
+            text: {
+              body: result.message,
+            },
           },
-        },
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      res.sendStatus(200);
+        res.sendStatus(200);
+      } catch (err) {
+        console.error("Failed to send message:", err);
+        res.sendStatus(500);
+      }
     } else {
       res.sendStatus(404);
     }
