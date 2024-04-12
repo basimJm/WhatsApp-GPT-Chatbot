@@ -13,7 +13,7 @@ const openai = new OpenAi({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const aiAnswer = asyncHandler(async (question, phoneNum, next) => {
+async function aiAnswer(msg_body, phoneNum, next) {
   const user = await userModel
     .findOne({ phoneNum: phoneNum })
     .populate("chatHistory");
@@ -27,7 +27,7 @@ const aiAnswer = asyncHandler(async (question, phoneNum, next) => {
 
   // let dbAnswer = "";
   // for (let storedMessage of chatHistoryMessages) {
-  //   if (storedMessage.userMessage === question) {
+  //   if (storedMessage.userMessage === msg_body) {
   //     console.log(`answer from DB : ${storedMessage.aiMessage}`);
   //     dbAnswer = storedMessage.aiMessage;
   //     break;
@@ -49,7 +49,7 @@ const aiAnswer = asyncHandler(async (question, phoneNum, next) => {
     },
   ]);
 
-  message.push({ role: "user", content: question });
+  message.push({ role: "user", content: msg_body });
 
   const chatCompletion = await openai.chat.completions.create({
     messages: message,
@@ -58,7 +58,7 @@ const aiAnswer = asyncHandler(async (question, phoneNum, next) => {
   const aiMessage = chatCompletion.choices[0].message.content;
 
   const newChatHistory = {
-    userMessage: question,
+    userMessage: msg_body,
     aiMessage: aiMessage,
   };
 
@@ -68,8 +68,8 @@ const aiAnswer = asyncHandler(async (question, phoneNum, next) => {
 
   await user.save();
 
-  return aiMessage;
-});
+  return chatCompletion.choices[0].message.content;
+}
 
 exports.getWebhookMessage = async (req, res) => {
   let mode = req.query["hub.mode"];
@@ -124,7 +124,7 @@ exports.postWeebhook = async (req, res, next) => {
       console.log("from " + from);
       console.log("boady param " + msg_body);
       await saveNumber(from, phon_no_id, next);
-      const aiMessage = await aiAnswer(msg_body, from, next);
+      let aiMessage = await aiAnswer(msg_body, from, next);
       axios({
         method: "POST",
         url:
