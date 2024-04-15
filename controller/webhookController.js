@@ -13,15 +13,14 @@ const openai = new OpenAi({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function getUserAndChatHistory(phoneNum) {
-  console.log("Retrieving user and chat history");
-  return await userModel
+async function aiAnswer(question, phoneNum) {
+  console.log("open aiAnswer");
+  let user;
+
+  user = await userModel
     .findOne({ phoneNum: phoneNum })
     .populate("chatHistory");
-}
 
-// Check for existing answers in the chat history
-async function findAnswerInHistory(user, question) {
   const chatHistoryMessages = await ChatHistoryModel.find({
     _id: { $in: user.chatHistory },
   });
@@ -32,11 +31,7 @@ async function findAnswerInHistory(user, question) {
       return { message: aiMsg.aiMessage, source: "database" };
     }
   }
-  return null;
-}
 
-// Generate AI response
-async function generateAIResponse(user, question) {
   const message = user.chatHistory.flatMap((msg) => [
     { role: "user", content: msg.userMessage },
     { role: "assistant", content: msg.aiMessage },
@@ -48,27 +43,18 @@ async function generateAIResponse(user, question) {
     model: "gpt-3.5-turbo",
   });
 
-  return chatCompletion.choices[0].message.content;
-}
+  const aiMessage = chatCompletion.choices[0].message.content;
+  console.log(`aiAnswer opened and asnwer is ${aiMessage}`);
 
-// Save new chat history
-async function saveChatHistory(user, question, aiMessage) {
   const newChats = await ChatHistoryModel.create({
     userMessage: question,
     aiMessage: aiMessage,
   });
   user.chatHistory.push(newChats);
   await user.save();
-}
 
-// Main function
-async function aiAnswer(question) {
-  const chatCompletion = await openai.chat.completions.create({
-    messages: [{ role: "user", content: question }],
-    model: "gpt-3.5-turbo",
-  });
-
-  return chatCompletion.choices[0].message.content;
+  console.log(`ai answer done`);
+  return { message: aiMessage, source: "ai" };
 }
 
 exports.getWebhookMessage = asyncHandler(async (req, res) => {
@@ -123,7 +109,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
       console.log("boady param " + msg_body);
       await saveNumber(from, phon_no_id, next);
 
-      const result = await aiAnswer(msg_body);
+      const result = await aiAnswer(msg_body, from);
 
       try {
         await axios({
@@ -136,7 +122,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
           data: {
             messaging_product: "whatsapp",
             to: from,
-            text: { body: result },
+            text: { body: result.message },
           },
           headers: { "Content-Type": "application/json" },
         });
