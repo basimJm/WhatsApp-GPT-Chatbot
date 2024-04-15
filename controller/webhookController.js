@@ -13,14 +13,60 @@ const openai = new OpenAi({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function aiAnswer(question, phoneNum) {
-  console.log("open aiAnswer");
-  let user;
+// async function aiAnswer(question, phoneNum) {
+//   console.log("open aiAnswer");
+//   let user;
 
-  user = await userModel
+//   user = await userModel
+//     .findOne({ phoneNum: phoneNum })
+//     .populate("chatHistory");
+
+//   const chatHistoryMessages = await ChatHistoryModel.find({
+//     _id: { $in: user.chatHistory },
+//   });
+
+//   for (let aiMsg of chatHistoryMessages) {
+//     if (aiMsg.userMessage === question) {
+//       console.log(`Answer from DB: ${aiMsg.aiMessage}`);
+//       return { message: aiMsg.aiMessage, source: "database" };
+//     }
+//   }
+
+//   const message = user.chatHistory.flatMap((msg) => [
+//     { role: "user", content: msg.userMessage },
+//     { role: "assistant", content: msg.aiMessage },
+//   ]);
+//   message.push({ role: "user", content: question });
+
+//   const chatCompletion = await openai.chat.completions.create({
+//     messages: message,
+//     model: "gpt-3.5-turbo",
+//   });
+
+//   const aiMessage = chatCompletion.choices[0].message.content;
+//   console.log(`aiAnswer opened and asnwer is ${aiMessage}`);
+
+//   const newChats = await ChatHistoryModel.create({
+//     userMessage: question,
+//     aiMessage: aiMessage,
+//   });
+//   user.chatHistory.push(newChats);
+//   await user.save();
+
+//   console.log(`ai answer done`);
+//   return { message: aiMessage, source: "ai" };
+// }
+
+// Retrieve user and their chat history
+async function getUserAndChatHistory(phoneNum) {
+  console.log("Retrieving user and chat history");
+  return await userModel
     .findOne({ phoneNum: phoneNum })
     .populate("chatHistory");
+}
 
+// Check for existing answers in the chat history
+async function findAnswerInHistory(user, question) {
   const chatHistoryMessages = await ChatHistoryModel.find({
     _id: { $in: user.chatHistory },
   });
@@ -31,7 +77,11 @@ async function aiAnswer(question, phoneNum) {
       return { message: aiMsg.aiMessage, source: "database" };
     }
   }
+  return null;
+}
 
+// Generate AI response
+async function generateAIResponse(user, question) {
   const message = user.chatHistory.flatMap((msg) => [
     { role: "user", content: msg.userMessage },
     { role: "assistant", content: msg.aiMessage },
@@ -43,17 +93,34 @@ async function aiAnswer(question, phoneNum) {
     model: "gpt-3.5-turbo",
   });
 
-  const aiMessage = chatCompletion.choices[0].message.content;
-  console.log(`aiAnswer opened and asnwer is ${aiMessage}`);
+  return chatCompletion.choices[0].message.content;
+}
 
+// Save new chat history
+async function saveChatHistory(user, question, aiMessage) {
   const newChats = await ChatHistoryModel.create({
     userMessage: question,
     aiMessage: aiMessage,
   });
   user.chatHistory.push(newChats);
   await user.save();
+}
 
-  console.log(`ai answer done`);
+// Main function
+async function aiAnswer(question, phoneNum) {
+  console.log("open aiAnswer");
+  const user = await getUserAndChatHistory(phoneNum);
+
+  const existingAnswer = await findAnswerInHistory(user, question);
+  if (existingAnswer) {
+    return existingAnswer;
+  }
+
+  const aiMessage = await generateAIResponse(user, question);
+  await saveChatHistory(user, question, aiMessage);
+  console.log(`aiAnswer opened and answer is ${aiMessage}`);
+
+  console.log("ai answer done");
   return { message: aiMessage, source: "ai" };
 }
 
