@@ -30,7 +30,7 @@ exports.findAndUpdateUserSubscription = asyncHandler(
   async (req, res, next, webhookNumber) => {
     const customers = await stripe.customers.list();
     const user = await phone.findOne({ phoneNum: webhookNumber });
-    if (!user || !customers.data.length === 0) {
+    if (!user || customers.data.length === 0) {
       await updateUserSubscription(user, webhookNumber, false);
       console.log(`update to false  after ! condition`);
     } else {
