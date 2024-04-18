@@ -13,61 +13,51 @@ const openai = new OpenAi({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// async function aiAnswer(question, phoneNum) {
-//   console.log("open aiAnswer");
-//   let user;
+async function aiAnswer(question, phoneNum) {
+  console.log("open aiAnswer");
+  let user;
 
-//   user = await userModel
-//     .findOne({ phoneNum: phoneNum })
-//     .populate("chatHistory");
+  user = await userModel
+    .findOne({ phoneNum: phoneNum })
+    .populate("chatHistory");
 
-//   const chatHistoryMessages = await ChatHistoryModel.find({
-//     _id: { $in: user.chatHistory },
-//   });
+  const chatHistoryMessages = await ChatHistoryModel.find({
+    _id: { $in: user.chatHistory },
+  });
 
-//   for (let aiMsg of chatHistoryMessages) {
-//     if (aiMsg.userMessage === question) {
-//       console.log(`Answer from DB: ${aiMsg.aiMessage}`);
-//       return {
-//         message: `Answer from DB is : ${aiMsg.aiMessage}`,
-//         source: "database",
-//       };
-//     }
-//   }
+  for (let aiMsg of chatHistoryMessages) {
+    if (aiMsg.userMessage === question) {
+      console.log(`Answer from DB: ${aiMsg.aiMessage}`);
+      return {
+        message: `Answer form DB${aiMsg.aiMessage}`,
+        source: "database",
+      };
+    }
+  }
 
-//   const message = user.chatHistory.flatMap((msg) => [
-//     { role: "user", content: msg.userMessage },
-//     { role: "assistant", content: msg.aiMessage },
-//   ]);
-//   message.push({ role: "user", content: question });
+  const message = user.chatHistory.flatMap((msg) => [
+    { role: "user", content: msg.userMessage },
+    { role: "assistant", content: msg.aiMessage },
+  ]);
+  message.push({ role: "user", content: question });
 
-//   const chatCompletion = await openai.chat.completions.create({
-//     messages: message,
-//     model: "gpt-3.5-turbo",
-//   });
-
-//   const aiMessage = chatCompletion.choices[0].message.content;
-//   console.log(`aiAnswer opened and asnwer is ${aiMessage}`);
-
-//   const newChats = await ChatHistoryModel.create({
-//     userMessage: question,
-//     aiMessage: aiMessage,
-//   });
-//   user.chatHistory.push(newChats);
-//   await user.save();
-
-//   console.log(`ai answer done`);
-//   return { message: aiMessage, source: "ai" };
-// }
-
-async function aiAnswer(question) {
   const chatCompletion = await openai.chat.completions.create({
-    messages: [
-      { role: "user", content: `just answer this question please ${question}` },
-    ],
+    messages: message,
     model: "gpt-3.5-turbo",
   });
-  return chatCompletion.choices[0].message.content;
+
+  const aiMessage = chatCompletion.choices[0].message.content;
+  console.log(`aiAnswer opened and asnwer is ${aiMessage}`);
+
+  const newChats = await ChatHistoryModel.create({
+    userMessage: question,
+    aiMessage: aiMessage,
+  });
+  user.chatHistory.push(newChats);
+  await user.save();
+
+  console.log(`ai answer done`);
+  return { message: aiMessage, source: "ai" };
 }
 
 exports.getWebhookMessage = asyncHandler(async (req, res) => {
@@ -122,7 +112,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
       console.log("boady param " + msg_body);
       await saveNumber(from, phon_no_id, next);
 
-      const result = await aiAnswer(msg_body);
+      const result = await aiAnswer(msg_body, from);
 
       try {
         await axios({
@@ -135,7 +125,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
           data: {
             messaging_product: "whatsapp",
             to: from,
-            text: { body: result },
+            text: { body: result.message },
           },
           headers: { "Content-Type": "application/json" },
         });
