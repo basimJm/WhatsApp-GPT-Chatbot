@@ -29,35 +29,28 @@ exports.findNumberId = async function (phoneNum) {
 exports.findAndUpdateUserSubscription = asyncHandler(
   async (req, res, next, webhookNumber) => {
     const customers = await stripe.customers.list();
-    if (customers) {
-      let user;
+    const user = await phone.findOne({ phoneNum: phonNum });
+    if (!user || !customers) {
+      await updateUserSubscription(user, webhookNumber, false);
+      return next(new ApiError("user not found"), 404);
+    } else {
       for (const data of customers.data) {
         const phonNum = data.phone.replace("+", "");
         if (phonNum === webhookNumber) {
-          console.log(`from webhook flag ${phonNum}`);
-          user = await phone.findOne({ phoneNum: phonNum });
-          if (!user) {
-            console.log(`user not found yet`);
-            return next(new ApiError("user not found"), 404);
-          } else {
-            await updateUserSubscription(user, phonNum, true);
-            console.log(`user update to true `);
-          }
+          await updateUserSubscription(user, phonNum, true);
         } else {
           await updateUserSubscription(user, phonNum, false);
         }
       }
-    } else {
-      return next(new ApiError("no customers yet"), 404);
-    }
-
-    async function updateUserSubscription(user, phonNum, falg) {
-      console.log(`user phone is ${user.phoneNum}`);
-      await phone.findOneAndUpdate(
-        { phoneNum: phonNum },
-        { $set: { isSubscriber: falg } },
-        { new: true }
-      );
     }
   }
 );
+
+async function updateUserSubscription(user, phonNum, falg) {
+  console.log(`user phone is ${user.phoneNum}`);
+  await phone.findOneAndUpdate(
+    { phoneNum: phonNum },
+    { $set: { isSubscriber: falg } },
+    { new: true }
+  );
+}
