@@ -32,12 +32,15 @@ exports.findAndUpdateUserSubscription = asyncHandler(
     const user = await phone.findOne({ phoneNum: webhookNumber });
     if (!user || !customers) {
       await updateUserSubscription(user, webhookNumber, false);
+      console.log(`update to false  after ! condition`);
     } else {
       for (const data of customers.data) {
         const phonNum = data.phone.replace("+", "");
         if (phonNum === webhookNumber) {
+          console.log(`update to true  after === condition`);
           await updateUserSubscription(user, phonNum, true);
         } else {
+          console.log(`update to false  after === condition`);
           await updateUserSubscription(user, phonNum, false);
         }
       }
