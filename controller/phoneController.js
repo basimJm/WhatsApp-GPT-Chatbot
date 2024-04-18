@@ -26,27 +26,29 @@ exports.findNumberId = async function (phoneNum) {
 };
 
 // get all cutomers in strip dashboard
-exports.getAllCustomers = asyncHandler(async (req, res, next) => {
-  const customers = await stripe.customers.list();
-  if (customers) {
-    let user;
-    for (const data of customers.data) {
-      if (data.phone !== null) {
+exports.getAllCustomers = asyncHandler(
+  async (req, res, next, webhookNumber) => {
+    const customers = await stripe.customers.list();
+    if (customers) {
+      let user;
+      for (const data of customers.data) {
         const phonNum = data.phone.replace("+", "");
-        console.log(phonNum);
-        user = await phone.findOne({ phoneNum: phonNum });
+        while (phonNum === webhookNumber) {
+          console.log(phonNum);
+          user = await phone.findOne({ phoneNum: phonNum });
+        }
       }
-    }
-    if (!user) {
-      return next(new ApiError("user not found"), 404);
+      if (!user) {
+        return next(new ApiError("user not found"), 404);
+      } else {
+        console.log(`user phone is ${user.phoneNum}`);
+        await phone.findOneAndUpdate(
+          { phoneNum: customers.data.phone },
+          { isSubscriber: true }
+        );
+      }
     } else {
-      console.log(`user phone is ${user.phoneNum}`);
-      await phone.findOneAndUpdate(
-        { phoneNum: customers.data.phone },
-        { isSubscriber: true }
-      );
+      return next(new ApiError("no customers yet"), 404);
     }
-  } else {
-    return next(new ApiError("no customers yet"), 404);
   }
-});
+);
