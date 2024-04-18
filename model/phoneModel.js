@@ -8,6 +8,14 @@ const userSchema = new mongoose.Schema({
   phoneNumId: {
     type: String,
   },
+  requestNum: {
+    type: Number,
+    default: 0,
+  },
+  isSubscriber: {
+    type: Boolean,
+    default: false,
+  },
   chatHistory: [
     {
       type: mongoose.Schema.Types.ObjectId,
