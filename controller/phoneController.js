@@ -31,8 +31,11 @@ exports.findAndUpdateUserSubscription = asyncHandler(
     const customers = await stripe.customers.list();
     const user = await phone.findOne({ phoneNum: webhookNumber });
     if (!user || customers.data.length === 0) {
+      const requestNum = user.requestNum;
+      await updateUserRequestNumber(webhookNumber, requestNum);
       await updateUserSubscription(user, webhookNumber, false);
       console.log(`update to false  after ! condition`);
+      return next(new ApiError("user/customer not found", 404));
     } else {
       for (const data of customers.data) {
         const phonNum = data.phone.replace("+", "");
@@ -53,6 +56,14 @@ async function updateUserSubscription(user, phonNum, falg) {
   await phone.findOneAndUpdate(
     { phoneNum: phonNum },
     { $set: { isSubscriber: falg } },
+    { new: true }
+  );
+}
+
+async function updateUserRequestNumber(phoneNum, requestNum) {
+  await phone.findOneAndUpdate(
+    { phoneNum: phoneNum },
+    { requestNum: requestNum },
     { new: true }
   );
 }
