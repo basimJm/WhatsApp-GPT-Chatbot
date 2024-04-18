@@ -25,13 +25,20 @@ exports.findNumberId = async function (phoneNum) {
   return mobile;
 };
 
+// exports.getUserByPhoneNum = asyncHandler(async(phoneNum)=>{
+//   const user = await phone.findOne({ phoneNum: phoneNum });
+//   if(!user){
+
+//   }
+// })
+
 // get all cutomers in strip dashboard
 exports.findAndUpdateUserSubscription = asyncHandler(
   async (req, res, next, webhookNumber) => {
     const customers = await stripe.customers.list();
     const user = await phone.findOne({ phoneNum: webhookNumber });
     if (!user || customers.data.length === 0) {
-      const requestNum = user.requestNum;
+      const requestNum = user.requestNum + 1;
       await updateUserRequestNumber(webhookNumber, requestNum);
       await updateUserSubscription(user, webhookNumber, false);
       console.log(`update to false  after ! condition`);
