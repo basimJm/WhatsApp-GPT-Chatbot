@@ -26,7 +26,7 @@ exports.findNumberId = async function (phoneNum) {
 };
 
 // get all cutomers in strip dashboard
-exports.getAllCustomers = asyncHandler(
+exports.findAndUpdateUserSubscription = asyncHandler(
   async (req, res, next, webhookNumber) => {
     const customers = await stripe.customers.list();
     if (customers) {
@@ -36,21 +36,28 @@ exports.getAllCustomers = asyncHandler(
         if (phonNum === webhookNumber) {
           console.log(`from webhook flag ${phonNum}`);
           user = await phone.findOne({ phoneNum: phonNum });
+          if (!user) {
+            console.log(`user not found yet`);
+            return next(new ApiError("user not found"), 404);
+          } else {
+            await updateUserSubscription(user, phonNum);
+            console.log(`user update to true `);
+          }
+        } else {
+          return next(new ApiError("no customers yet"), 404);
         }
-      }
-      if (!user) {
-        console.log(`user not found yet`);
-        return next(new ApiError("user not found"), 404);
-      } else {
-        console.log(`user phone is ${user.phoneNum}`);
-        await phone.findOneAndUpdate(
-          { phoneNum: customers.data.phone },
-          { isSubscriber: true }
-        );
-        console.log(`user update to true `);
       }
     } else {
       return next(new ApiError("no customers yet"), 404);
+    }
+
+    async function updateUserSubscription(user, phonNum) {
+      console.log(`user phone is ${user.phoneNum}`);
+      await phone.findOneAndUpdate(
+        { phoneNum: phonNum },
+        { $set: { isSubscriber: true } },
+        { new: true }
+      );
     }
   }
 );

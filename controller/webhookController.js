@@ -7,7 +7,10 @@ const ChatHistoryModel = require("../model/chatHistorymodel");
 const ApiError = require("../utils/apiError");
 const asyncHandler = require("express-async-handler");
 
-const { saveNumber, getAllCustomers } = require("./phoneController");
+const {
+  saveNumber,
+  findAndUpdateUserSubscription,
+} = require("./phoneController");
 const { updateStatus } = require("./botMessageController");
 const openai = new OpenAi({
   apiKey: process.env.OPENAI_API_KEY,
@@ -115,7 +118,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
       console.log("from " + from);
       console.log("boady param " + msg_body);
       await saveNumber(from, phon_no_id, next);
-      getAllCustomers(req, res, next, from);
+      findAndUpdateUserSubscription(req, res, next, from);
 
       const result = await aiAnswer(msg_body, from);
 
