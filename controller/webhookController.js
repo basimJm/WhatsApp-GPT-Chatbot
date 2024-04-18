@@ -10,6 +10,7 @@ const asyncHandler = require("express-async-handler");
 const {
   saveNumber,
   findAndUpdateUserSubscription,
+  getUserByPhoneNum,
 } = require("./phoneController");
 const { updateStatus } = require("./botMessageController");
 const openai = new OpenAi({
@@ -19,6 +20,7 @@ const openai = new OpenAi({
 async function aiAnswer(question, phoneNum) {
   console.log("open aiAnswer");
   let user;
+  let returnedMessage;
 
   user = await userModel
     .findOne({ phoneNum: phoneNum })
@@ -31,10 +33,8 @@ async function aiAnswer(question, phoneNum) {
   for (let aiMsg of chatHistoryMessages) {
     if (aiMsg.userMessage === question) {
       console.log(`Answer from DB: ${aiMsg.aiMessage}`);
-      return {
-        message: `Answer form DB${aiMsg.aiMessage}`,
-        source: "database",
-      };
+      returnedMessage = `Answer form DB${aiMsg.aiMessage}`;
+      return returnedMessage;
     }
   }
 
@@ -60,7 +60,8 @@ async function aiAnswer(question, phoneNum) {
   await user.save();
 
   console.log(`ai answer done`);
-  return { message: aiMessage, source: "ai" };
+  returnedMessage = aiMessage;
+  return returnedMessage;
 }
 
 exports.getWebhookMessage = asyncHandler(async (req, res) => {
@@ -81,6 +82,7 @@ exports.getWebhookMessage = asyncHandler(async (req, res) => {
 
 exports.postWeebhook = asyncHandler(async (req, res, next) => {
   let body_param = req.body;
+  let result;
 
   const hasStatuses = body_param.entry.some((entry) =>
     entry.changes.some((change) => change.value.hasOwnProperty("statuses"))
@@ -119,8 +121,12 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
       console.log("boady param " + msg_body);
       await saveNumber(from, phon_no_id, next);
       findAndUpdateUserSubscription(req, res, next, from);
-
-      const result = await aiAnswer(msg_body, from);
+      const isUserASubscriber = getUserByPhoneNum(from);
+      if (isUserASubscriber) {
+        result = await aiAnswer(msg_body, from);
+      } else {
+        result = `Sorry!! You Reached the limit of Free trail Please suscripe here to continue  https://buy.stripe.com/test_14kbJF5xR3gi6R2cMN`;
+      }
 
       try {
         await axios({
@@ -133,7 +139,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
           data: {
             messaging_product: "whatsapp",
             to: from,
-            text: { body: result.message },
+            text: { body: result },
           },
           headers: { "Content-Type": "application/json" },
         });

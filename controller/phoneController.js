@@ -1,7 +1,9 @@
 const phone = require("../model/phoneModel");
 const asyncHandler = require("express-async-handler");
 const ApiError = require("../utils/apiError");
-const stripe = require("stripe")(process.env.STRIP_SECRET_KEY);
+const stripe = require("stripe")(
+  "sk_test_51OyMbA1D08DtjSM8pGX8yUA7PVcCRL5F86NjEmfsaIk10ax3DNlnIhK5Eb1kXymYzuxGGTNOQxq2M1fbU4r46VTj00bSTp3WfD"
+);
 
 exports.saveNumber = async function (number, phoneNumId, next) {
   const isNumberUsed = await phone.findOne({ phoneNum: number });
@@ -25,12 +27,18 @@ exports.findNumberId = async function (phoneNum) {
   return mobile;
 };
 
-// exports.getUserByPhoneNum = asyncHandler(async(phoneNum)=>{
-//   const user = await phone.findOne({ phoneNum: phoneNum });
-//   if(!user){
+exports.getUserByPhoneNum = asyncHandler(async (phoneNum) => {
+  const user = await phone.findOne({ phoneNum: phoneNum });
+  if (!user) {
+    console.log("user not found");
+  }
 
-//   }
-// })
+  if (user.requestNum >= 2 && user.isSubscriber === false) {
+    return false;
+  } else {
+    return true;
+  }
+});
 
 // get all cutomers in strip dashboard
 exports.findAndUpdateUserSubscription = asyncHandler(
