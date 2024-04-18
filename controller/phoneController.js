@@ -40,22 +40,22 @@ exports.findAndUpdateUserSubscription = asyncHandler(
             console.log(`user not found yet`);
             return next(new ApiError("user not found"), 404);
           } else {
-            await updateUserSubscription(user, phonNum);
+            await updateUserSubscription(user, phonNum, true);
             console.log(`user update to true `);
           }
         } else {
-          return next(new ApiError("no customers yet"), 404);
+          await updateUserSubscription(user, phonNum, false);
         }
       }
     } else {
       return next(new ApiError("no customers yet"), 404);
     }
 
-    async function updateUserSubscription(user, phonNum) {
+    async function updateUserSubscription(user, phonNum, falg) {
       console.log(`user phone is ${user.phoneNum}`);
       await phone.findOneAndUpdate(
         { phoneNum: phonNum },
-        { $set: { isSubscriber: true } },
+        { $set: { isSubscriber: falg } },
         { new: true }
       );
     }
