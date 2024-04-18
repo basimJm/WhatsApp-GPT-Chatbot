@@ -33,12 +33,13 @@ exports.getAllCustomers = asyncHandler(
       let user;
       for (const data of customers.data) {
         const phonNum = data.phone.replace("+", "");
-        while (phonNum === webhookNumber) {
-          console.log(phonNum);
+        if (phonNum === webhookNumber) {
+          console.log(`from webhook flag ${phonNum}`);
           user = await phone.findOne({ phoneNum: phonNum });
         }
       }
       if (!user) {
+        console.log(`user not found yet`);
         return next(new ApiError("user not found"), 404);
       } else {
         console.log(`user phone is ${user.phoneNum}`);
@@ -46,6 +47,7 @@ exports.getAllCustomers = asyncHandler(
           { phoneNum: customers.data.phone },
           { isSubscriber: true }
         );
+        console.log(`user update to true `);
       }
     } else {
       return next(new ApiError("no customers yet"), 404);
