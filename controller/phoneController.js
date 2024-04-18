@@ -32,7 +32,6 @@ exports.findAndUpdateUserSubscription = asyncHandler(
     const user = await phone.findOne({ phoneNum: webhookNumber });
     if (!user || !customers) {
       await updateUserSubscription(user, webhookNumber, false);
-      return next(new ApiError("user not found"), 404);
     } else {
       for (const data of customers.data) {
         const phonNum = data.phone.replace("+", "");
