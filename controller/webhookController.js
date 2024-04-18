@@ -28,7 +28,10 @@ async function aiAnswer(question, phoneNum) {
   for (let aiMsg of chatHistoryMessages) {
     if (aiMsg.userMessage === question) {
       console.log(`Answer from DB: ${aiMsg.aiMessage}`);
-      return { message: aiMsg.aiMessage, source: "database" };
+      return {
+        message: `Answer from DB is : ${aiMsg.aiMessage}`,
+        source: "database",
+      };
     }
   }
 
