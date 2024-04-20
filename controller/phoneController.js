@@ -32,8 +32,10 @@ exports.getUserByPhoneNum = asyncHandler(async (phoneNum) => {
   if (!user) {
     console.log("user not found");
   }
-
-  if (user.requestNum >= 2 && user.isSubscriber == false) {
+  console.log(
+    `user data for payment is ${user.requestNum} and ${user.isSubscriber}`
+  );
+  if (user.requestNum >= 2 && !user.isSubscriber) {
     return false;
   } else {
     return true;
