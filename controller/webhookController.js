@@ -123,7 +123,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
       findAndUpdateUserSubscription(req, res, next, from);
       const isUserASubscriber = await getUserByPhoneNum(from);
       console.log(`from paywehbhook is ${isUserASubscriber}`);
-      if (!isUserASubscriber) {
+      if (isUserASubscriber) {
         result = await aiAnswer(msg_body, from);
       } else {
         result = `Sorry!! You Reached the limit of Free trail Please suscripe here to continue  https://buy.stripe.com/test_14kbJF5xR3gi6R2cMN`;
