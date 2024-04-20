@@ -33,7 +33,7 @@ exports.getUserByPhoneNum = asyncHandler(async (phoneNum) => {
     console.log("user not found");
   }
 
-  if (user.requestNum >= 2 && user.isSubscriber === false) {
+  if (user.requestNum >= 2 && user.isSubscriber == false) {
     return false;
   } else {
     return true;
