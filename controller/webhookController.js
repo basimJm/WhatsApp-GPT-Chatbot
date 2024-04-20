@@ -120,7 +120,7 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
       console.log("from " + from);
       console.log("boady param " + msg_body);
       await saveNumber(from, phon_no_id, next);
-      findAndUpdateUserSubscription(req, res, next, from);
+      await findAndUpdateUserSubscription(req, res, next, from);
       const isUserASubscriber = await getUserByPhoneNum(from);
       console.log(`from paywehbhook is ${isUserASubscriber}`);
       if (isUserASubscriber) {
