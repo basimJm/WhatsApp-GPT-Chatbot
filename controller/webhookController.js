@@ -6,6 +6,7 @@ const userModel = require("../model/phoneModel");
 const ChatHistoryModel = require("../model/chatHistorymodel");
 const ApiError = require("../utils/apiError");
 const asyncHandler = require("express-async-handler");
+const statusCodes = require("../statusCodes");
 
 const {
   saveNumber,
@@ -71,12 +72,12 @@ exports.getWebhookMessage = asyncHandler(async (req, res) => {
 
   if (mode && token) {
     if (mode === "subscribe" && token === mytoken) {
-      return res.status(200).send(challange);
+      return res.status(statusCodes.SUCCESS.NO_CONTENT).send(challange);
     } else {
-      return res.status(200);
+      return res.status(statusCodes.SUCCESS.NO_CONTENT);
     }
   } else {
-    return res.status(200);
+    return res.status(statusCodes.SUCCESS.NO_CONTENT);
   }
 });
 
@@ -146,12 +147,14 @@ exports.postWeebhook = asyncHandler(async (req, res, next) => {
         });
         if (!res.headersSent) {
           res.setHeader("Content-Type", "application/json");
-          res.sendStatus(200);
+          res.sendStatus(statusCodes.SUCCESS.NO_CONTENT);
         }
       } catch (err) {
         console.log(`error from axios is : ${err.message}`);
         if (!res.headersSent) {
-          res.status(500).send({ error: err.message });
+          res
+            .status(statusCodes.ERRORS.SERVER_ERROR)
+            .send({ error: err.message });
         }
       }
     }
